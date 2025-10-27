@@ -4,33 +4,44 @@ from Position import *
 from txtConverters import *
 from Agent import *
 from txtConverters import *
-import time
 
-def printMapData(m, w, h):
-  for i in range(w):
-    for j in range(h):
-      print(f"({m[i][j].kind} {m[i][j].hp})", end=" ")
-    print("\n")
-
-def printMap(m, w, h):
-  generateFile(m, w, h)
-  print(open("map.txt").read())
-
-# MAIN FUNCTION
-time.sleep(2)
+# Read in input map 
 m, dims, a = generateMap(sys.argv[1])
 w = dims[0]
 h = dims[1]
 printMap(m, w, h)
-blockFile(5)
 
+# Generate the instruction sets for each agent using the algorithm being tested
+agentInstructions = []
 for i in range(len(a)):
-  prev, firstExit = bfsAgent(m, a[i], w, h)
-  drawPath(m, firstExit, prev)
+  agentInstructions.append(bfs(m, a[i], w, h))
+
+tick = 0
+while 1:
+  numAgentsFinished = 0
+
+  # Loop through all agents and move them according to 
+  for i in range(len(a)):
+    if (tick >= len(agentInstructions[i])):
+      numAgentsFinished += 1
+      continue
+    
+    # Attempt to move the agent
+    moved, a[i] = moveAgent(m, a[i], agentInstructions[i][tick])
+
+    # Insert a buffer instruction to stop the agent from moving past the current instruction
+    if moved == False:
+      agentInstructions[i].insert(tick, Position(-1,-1)) 
+  
   printMap(m, w, h)
 
+  # Remove an agent that has reached an exit tile from that tile
+  for agent in reversed(a):
+    if m[agent.row][agent.col].kind == "exit":
+      m[agent.row][agent.col].hasAgent = False
 
-printMap(m, w, h)
+  if len(a) == numAgentsFinished:
+    break
+  tick += 1
 
-while 1:
-  blockFile(10)
+print(f"Simulation completed in {tick} ticks!")

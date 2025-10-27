@@ -1,7 +1,9 @@
+# Tile object used to store map cell data
 class Tile:
-  def __init__(self, kind='void', hp="0"):
+  def __init__(self, kind='void', hp="0", hasAgent=False):
     self.kind = kind
     self.hp = hp
+    self.hasAgent = hasAgent
 
   def isTraversable(self):
     if self.kind == "wall":
@@ -9,10 +11,15 @@ class Tile:
     else:
       return True
     
-def createTile(c):
-  t = Tile(parseKind(c), 10)
+# Helper function which handles tile creation
+def createTile(c, hasAgent):
+  t = Tile(parseKind(c), 10, hasAgent)
+
+  # Add material dependent hp here
+
   return t
 
+# Translate map characters into their 'kinds'
 def parseKind(c):
   if c == '#':
     return "wall"
@@ -24,7 +31,7 @@ def parseKind(c):
     return "obst"
   elif c == 'E':
     return "exit"
-  elif c == 'P':
-    return "prsn"
+  # elif c == 'P':
+  #   return "prsn"
   else:  
     return "err"

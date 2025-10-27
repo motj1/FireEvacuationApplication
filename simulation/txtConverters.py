@@ -5,6 +5,7 @@ from time import sleep
 import fcntl
 import os
 
+# Parse a .txt file into an w x h array of tiles corresponding to the w x h map given inside
 def generateMap(filename):
   f = open(filename)
 
@@ -22,9 +23,11 @@ def generateMap(filename):
   while c != '':
     j = 0
     while c != '\n':
-      buildingMap[i][j] = createTile(c)
       if c == 'P':
         agents.append(Position(i, j))
+        buildingMap[i][j] = createTile(' ', True)
+      else:
+        buildingMap[i][j] = createTile(c, False)
       c = f.read(1)
       j += 1
     c = f.read(1)
@@ -32,6 +35,7 @@ def generateMap(filename):
       
   return buildingMap, dimensions, agents
 
+# Parse the map array of tiles, m, into a text file to be printed
 def generateFile(m, w, h):
   with open("map.txt", "r") as f:
       fcntl.flock(f.fileno(), fcntl.LOCK_EX)
@@ -40,15 +44,20 @@ def generateFile(m, w, h):
     fcntl.flock(f.fileno(), fcntl.LOCK_EX)
     for i in range(h):
       for j in range(w):
-        f.write(parseChar(m[i][j].kind))
+        if (m[i][j].hasAgent == True):
+          f.write("P")
+        else:
+          f.write(parseChar(m[i][j].kind))
       f.write("\n")
   return "map.txt"
 
+# Block access to map.txt for a given amount of time
 def blockFile(blockTime):
   with open("map.txt", "r") as f:
     fcntl.flock(f.fileno(), fcntl.LOCK_EX)
     sleep(blockTime)
 
+# Given the kind of a tile, return the appropriate representative character
 def parseChar(kind):
   if kind == "wall":
     return '#'
@@ -66,3 +75,8 @@ def parseChar(kind):
     return '+'
   elif kind == "err":  
     return '?'
+
+# Generates the map.txt based on the simulation state and prints its contents to terminal
+def printMap(m, w, h):
+  generateFile(m, w, h)
+  print(open("map.txt").read())

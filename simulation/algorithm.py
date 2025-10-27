@@ -1,6 +1,8 @@
 from Position import Position
 
-def bfsAgent(m, curr, w, h):
+# Runs a BFS originating from the given person until an exit tile is found
+# Must return an ordered list of instructions determined by the algorithm
+def bfs(m, curr, w, h):
   q = []
   visited = [[False for _ in range(w)] for _ in range(h)]
   prev = [[[-1,-1] for _ in range(w)] for _ in range(h)]
@@ -22,20 +24,23 @@ def bfsAgent(m, curr, w, h):
 
       if m[newRow][newCol].kind == "exit":
         prev[newRow][newCol] = curr
-        return [prev, Position(newRow, newCol)]
+        return generateInstructionsBFS(prev, newRow, newCol)
 
       if visited[newRow][newCol] == False and m[newRow][newCol].isTraversable() == True:
         visited[newRow][newCol] = True
         prev[newRow][newCol] = curr
         q.append([newRow, newCol])
 
-def drawPath(m, firstExit, prev):
-  row = firstExit.row
-  col = firstExit.col
+# Generates an ordered list of coordinates the agent needs to move through to reach its nearest exit 
+def generateInstructionsBFS(prev, newRow, newCol):
+  instructions = []
+  row = newRow
+  col = newCol
 
   while prev[row][col][0] != -1:
-    if m[row][col].kind != "exit":
-      m[row][col].kind = "path"
+    instructions.insert(0, (Position(row, col)))
     prevRow = row
     row = prev[prevRow][col][0]
     col = prev[prevRow][col][1]
+
+  return instructions
