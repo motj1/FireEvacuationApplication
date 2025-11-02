@@ -11,10 +11,12 @@ def generateMultiStoryFile(m, dims):
     if dims[i][0] > maximumHeight:
       maximumHeight = dims[i][0]
 
+  sleep(0.01)
   with open("map.txt", "r") as f:
     fcntl.flock(f.fileno(), fcntl.LOCK_EX)
     sleep(0.5)
     fcntl.flock(f, fcntl.LOCK_UN)
+  sleep(0.01)
   with open("map.txt", "w") as f:
     fcntl.flock(f.fileno(), fcntl.LOCK_EX)
 

@@ -35,6 +35,7 @@ ESC[2k                  Erase entire line
 #define EXIT_COLOR 5
 #define PATH_COLOR 1
 #define OBJECT_COLOR 19
+#define STAIR_COLOR 129
 // 229
 
 int SIZEX = 0, SIZEY = 0;
@@ -42,8 +43,8 @@ int SIZEX = 0, SIZEY = 0;
 char *floors;
 uint8_t **map;
 
-#define numColours 7
-const uint8_t colours[numColours] = { EMPTY_COLOR, WALL_COLOR, PERSON_COLOR, FIRE_COLOR, EXIT_COLOR, PATH_COLOR, OBJECT_COLOR };
+#define numColours 8
+const uint8_t colours[numColours] = { EMPTY_COLOR, WALL_COLOR, PERSON_COLOR, FIRE_COLOR, EXIT_COLOR, PATH_COLOR, OBJECT_COLOR, STAIR_COLOR };
 // Can add symbols array if needed
 
 char *buffer;
@@ -95,7 +96,7 @@ void updateMap(char *filename) {
         for (int i = 0; i < SIZEY; i ++) map[i] = calloc(SIZEX, sizeof(uint8_t));
 
         floors = calloc(SIZEX, sizeof(char));
-        buffer = calloc((SIZEX + 1) * (SIZEY + 1), sizeof(char));
+        buffer = calloc((SIZEX) * (SIZEY) * 25, sizeof(char));
     }
     int in, iter = 0;
     while ((in = fgetc(fp)) != EOF) {
@@ -135,6 +136,9 @@ void updateMap(char *filename) {
             break;
         case 'O':
             map[i][j ++] = 6;
+            break;
+        case 'S':
+            map[i][j ++] = 7;
             break;
         case '\n':
             i ++;
