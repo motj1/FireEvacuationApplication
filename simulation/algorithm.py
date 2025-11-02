@@ -1,4 +1,5 @@
-from Position import Position
+from Position import *
+from Tile import *
 
 # Runs a BFS originating from the given person until an exit tile is found
 # Must return an ordered list of instructions determined by the algorithm
@@ -44,3 +45,39 @@ def generateInstructionsBFS(prev, newRow, newCol):
     col = prev[prevRow][col][1]
 
   return instructions
+
+def bfs3D(m, curr, dims):
+  rowDim = dims[curr.floor][0]
+  colDim = dims[curr.floor][1]
+
+  q = []
+  visited = [[[False for _ in range(colDim)] for _ in range(rowDim)] for _ in range(len(dims))]
+  prev = [[[[-1,-1] for _ in range(colDim)] for _ in range(rowDim)] for _ in range(len(dims))]
+
+  adjacencyCoords = [[0, 1], [1, 0], [0, -1], [-1, 0], [-1, -1], [1, 1], [-1, 1], [1, -1]]
+
+  visited[curr.floor][curr.row][curr.col] = True
+  q.append(Position3D(curr.floor, curr.row, curr.col))
+
+  while len(q) != 0:
+    curr = q.pop(0)
+
+    if type(m[curr.floor][curr.row][curr.col]) == Stairwell:
+      if (m[curr.floor][curr.row][curr.col].down.row >= 0):
+        q.append(m[curr.floor][curr.row][curr.col].down)
+
+    for i in range(len(adjacencyCoords)):
+      newRow = curr.row + adjacencyCoords[i][0]
+      newCol = curr.col + adjacencyCoords[i][1]
+
+      if newRow >= rowDim or newRow < 0 or newCol >= colDim or newCol < 0:
+        continue
+
+      if m[newRow][newCol].kind == "exit":
+        prev[newRow][newCol] = curr
+        return generateInstructionsBFS(prev, newRow, newCol)
+
+      if visited[newRow][newCol] == False and m[newRow][newCol].isTraversable() == True:
+        visited[newRow][newCol] = True
+        prev[newRow][newCol] = curr
+        q.append([newRow, newCol])
