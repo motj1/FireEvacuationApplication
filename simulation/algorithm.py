@@ -1,83 +1,57 @@
 from Position import *
 from Tile import *
-
-# Runs a BFS originating from the given person until an exit tile is found
-# Must return an ordered list of instructions determined by the algorithm
-def bfs(m, curr, w, h):
-  q = []
-  visited = [[False for _ in range(w)] for _ in range(h)]
-  prev = [[[-1,-1] for _ in range(w)] for _ in range(h)]
-
-  adjacencyCoords = [[0, 1], [1, 0], [0, -1], [-1, 0], [-1, -1], [1, 1], [-1, 1], [1, -1]]
-
-  visited[curr.row][curr.col] = True
-  q.append([curr.row, curr.col])
-
-  while len(q) != 0:
-    curr = q.pop(0)
-
-    for i in range(len(adjacencyCoords)):
-      newRow = curr[0] + adjacencyCoords[i][0]
-      newCol = curr[1] + adjacencyCoords[i][1]
-
-      if newRow >= h or newRow < 0 or newCol >= w or newCol < 0:
-        continue
-
-      if m[newRow][newCol].kind == "exit":
-        prev[newRow][newCol] = curr
-        return generateInstructionsBFS(prev, newRow, newCol)
-
-      if visited[newRow][newCol] == False and m[newRow][newCol].isTraversable() == True:
-        visited[newRow][newCol] = True
-        prev[newRow][newCol] = curr
-        q.append([newRow, newCol])
-
-# Generates an ordered list of coordinates the agent needs to move through to reach its nearest exit 
-def generateInstructionsBFS(prev, newRow, newCol):
-  instructions = []
-  row = newRow
-  col = newCol
-
-  while prev[row][col][0] != -1:
-    instructions.insert(0, (Position(row, col)))
-    prevRow = row
-    row = prev[prevRow][col][0]
-    col = prev[prevRow][col][1]
-
-  return instructions
+from txtConverters import *
 
 def bfs3D(m, curr, dims):
-  rowDim = dims[curr.floor][0]
-  colDim = dims[curr.floor][1]
-
   q = []
-  visited = [[[False for _ in range(colDim)] for _ in range(rowDim)] for _ in range(len(dims))]
-  prev = [[[[-1,-1] for _ in range(colDim)] for _ in range(rowDim)] for _ in range(len(dims))]
+  visited = [[[False for _ in range(dims[i][1])] for _ in range(dims[i][0])] for i in range(len(dims))]
+  prev = [[[Position3D(-1, -1, -1) for _ in range(dims[i][1])] for _ in range(dims[i][0])] for i in range(len(dims))]
 
   adjacencyCoords = [[0, 1], [1, 0], [0, -1], [-1, 0], [-1, -1], [1, 1], [-1, 1], [1, -1]]
 
   visited[curr.floor][curr.row][curr.col] = True
-  q.append(Position3D(curr.floor, curr.row, curr.col))
+  q.append(curr)
 
   while len(q) != 0:
     curr = q.pop(0)
 
-    if type(m[curr.floor][curr.row][curr.col]) == Stairwell:
+    if type(m[curr.floor][curr.row][curr.col]) is Stairwell:
       if (m[curr.floor][curr.row][curr.col].down.row >= 0):
-        q.append(m[curr.floor][curr.row][curr.col].down)
+        downCell = m[curr.floor][curr.row][curr.col].down
+        if visited[downCell.floor][downCell.row][downCell.col] == True:
+          continue
+        visited[downCell.floor][downCell.row][downCell.col] = True
+        prev[downCell.floor][downCell.row][downCell.col] = curr
+        q.append(downCell)
 
     for i in range(len(adjacencyCoords)):
       newRow = curr.row + adjacencyCoords[i][0]
       newCol = curr.col + adjacencyCoords[i][1]
 
-      if newRow >= rowDim or newRow < 0 or newCol >= colDim or newCol < 0:
+      if newRow >= dims[curr.floor][0] or newRow < 0 or newCol >= dims[curr.floor][1] or newCol < 0:
         continue
 
-      if m[newRow][newCol].kind == "exit":
-        prev[newRow][newCol] = curr
-        return generateInstructionsBFS(prev, newRow, newCol)
+      if m[curr.floor][newRow][newCol].kind == "exit":
+        prev[curr.floor][newRow][newCol] = curr
 
-      if visited[newRow][newCol] == False and m[newRow][newCol].isTraversable() == True:
-        visited[newRow][newCol] = True
-        prev[newRow][newCol] = curr
-        q.append([newRow, newCol])
+        return generateInstructionsBFS3D(prev, curr.floor, newRow, newCol)
+
+      if visited[curr.floor][newRow][newCol] == False and m[curr.floor][newRow][newCol].isTraversable() == True:
+        visited[curr.floor][newRow][newCol] = True
+        prev[curr.floor][newRow][newCol] = curr
+        q.append(Position3D(curr.floor, newRow, newCol))
+  print("No Path Found!")
+
+def generateInstructionsBFS3D(prev, floor, newRow, newCol):
+  instructions = []
+  row = newRow
+  col = newCol
+
+  while prev[floor][row][col].row != -1:
+    instructions.insert(0, (Position3D(floor, row, col)))
+    prevRow = row
+    prevFloor = floor
+    floor = prev[prevFloor][prevRow][col].floor
+    row = prev[prevFloor][prevRow][col].row
+    col = prev[prevFloor][prevRow][col].col
+  return instructions

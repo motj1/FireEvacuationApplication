@@ -18,14 +18,6 @@ class Stairwell(Tile):
     self.up = up
     self.down = down
 
-# Helper function which handles tile creation
-def createTile(c, hasAgent):
-  t = Tile(parseKind(c), 10, hasAgent)
-
-  # Add material dependent hp here
-
-  return t
-
 # Translate map characters into their 'kinds'
 def parseKind(c):
   if c == '#':
@@ -38,7 +30,7 @@ def parseKind(c):
     return "obst"
   elif c == 'E':
     return "exit"
-  # elif c == 'P':
-  #   return "prsn"
+  elif c == 'S':
+    return "strs"
   else:  
     return "err"

@@ -4,44 +4,12 @@ import re
 from time import sleep
 import fcntl
 
-# Parse a .txt file into an w x h array of tiles corresponding to the w x h map given inside
-def generateMap(filename):
-  f = open(filename)
-
-  agents = []
-
-  first_two_lines = [next(f) for _ in range(2)]
-  text = "".join(first_two_lines)
-  dimensions = [int(n) for n in re.findall(r'-?\d+', text)]
-  print(dimensions)
-
-  buildingMap = [[Tile() for _ in range(dimensions[1])] for _ in range(dimensions[0])]
-
-  i = 0
-  c = f.read(1)
-  while c != '':
-    j = 0
-    while c != '\n':
-      if c == 'P':
-        agents.append(Position(i, j))
-        buildingMap[i][j] = createTile(' ', True)
-      else:
-        buildingMap[i][j] = createTile(c, False)
-      c = f.read(1)
-      j += 1
-    c = f.read(1)
-    i += 1
-      
-  return buildingMap, dimensions, agents
-
 def generateMultiStoryMap(filename):
   f = open(filename)
 
   agents = []
 
-  firstLine = [next(f) for _ in range(1)]
-  text = "".join(firstLine)
-  numFloors = [int(n) for n in re.findall(r'-?\d+', text)]
+  numFloors = readFileForNumbers(f, 1)
 
   buildingMap = []
   floorDimensions = []
@@ -63,29 +31,13 @@ def generateMultiStoryMap(filename):
         c = f.read(1)
         if c == 'P':
           agents.append(Position3D(i, j, k))
-          buildingMap[i][j][k] = createTile(' ', True)
+          buildingMap[i][j][k] = Tile(parseKind(' '), 10, True)
         elif c == '\n':
           break
         else:
-          buildingMap[i][j][k] = createTile(c, False)
+          buildingMap[i][j][k] = Tile(parseKind(c), 10, False)
     c = f.read(1) 
   return buildingMap, floorDimensions, agents
-
-# Parse the map array of tiles, m, into a text file to be printed
-def generateFile(m, h, w):
-  with open("map.txt", "r") as f:
-      fcntl.flock(f.fileno(), fcntl.LOCK_EX)
-      sleep(0.5)
-  with open("map.txt", "w") as f:
-    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
-    for i in range(h):
-      for j in range(w):
-        if (m[i][j].hasAgent == True):
-          f.write("P")
-        else:
-          f.write(parseChar(m[i][j].kind))
-      f.write("\n")
-  return "map.txt"
 
 def generateMultiStoryFile(m, dims):
   maximumHeight = -1
@@ -125,7 +77,6 @@ def generateMultiStoryFile(m, dims):
 
   return "map.txt"
 
-
 # Block access to map.txt for a given amount of time
 def blockFile(blockTime):
   with open("map.txt", "r") as f:
@@ -148,14 +99,62 @@ def parseChar(kind):
     return 'P'
   elif kind == "path":
     return '+'
+  elif kind == 'strs':
+    return 'S'
   elif kind == "err":  
     return '?'
-
-# Generates the map.txt based on the simulation state and prints its contents to terminal
-def printMap(m, h, w):
-  generateFile(m, h, w)
-  print(open("map.txt").read())
 
 def printMultiStoryMap(m, dims):
   generateMultiStoryFile(m, dims)
   print(open("map.txt").read())
+
+def generateMultiStoryMapStairs(filename):
+  f = open(filename)
+
+  agents = []
+
+  numFloors = readFileForNumbers(f, 1)
+
+  buildingMap = []
+  floorDimensions = []
+
+  for i in range(numFloors[0]):
+    floorDimensions.append(readFileForNumbers(f, 2))
+    numStairs = readFileForNumbers(f, 1)
+
+    stairMappings = []
+    for j in range(numStairs[0]):
+      stairMappings.append(readFileForNumbers(f, 1))
+
+    buildingMap.append([[Tile() for _ in range(floorDimensions[i][1])] for _ in range(floorDimensions[i][0])])
+
+    stairNumber = 0
+
+    for j in range(floorDimensions[i][0]):
+      for k in range(floorDimensions[i][1] + 1):
+        c = f.read(1)
+        if c == 'P':
+          agents.append(Position3D(i, j, k))
+          buildingMap[i][j][k] = Tile(parseKind(' '), 10, True)
+        elif c == 'S':
+          floor = stairMappings[stairNumber][0]
+          row = stairMappings[stairNumber][1]
+          col = stairMappings[stairNumber][2]
+
+          print(stairMappings[stairNumber])
+
+          print(f"adding stairs on floor {i}")
+          buildingMap[i][j][k] = Stairwell(parseKind('S'), 10, False, Position3D(-1, -1, -1), Position3D(floor, row, col))
+          stairNumber += 1
+        elif c == '\n':
+          break
+        else:
+          buildingMap[i][j][k] = Tile(parseKind(c), 10, False)
+    c = f.read(1) 
+
+  return buildingMap, floorDimensions, agents
+
+def readFileForNumbers(f, n):
+  firstLine = [next(f) for _ in range(n)]
+  text = "".join(firstLine)
+  return [int(n) for n in re.findall(r'-?\d+', text)]
