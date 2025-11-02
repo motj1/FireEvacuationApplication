@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
+//#include <fcntl.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/file.h>
 
 /*
 Ansi escape codes:
@@ -41,7 +42,7 @@ int SIZEX = 0, SIZEY = 0;
 char *floors;
 uint8_t **map;
 
-const int numColours = 7;
+#define numColours 7
 const uint8_t colours[numColours] = { EMPTY_COLOR, WALL_COLOR, PERSON_COLOR, FIRE_COLOR, EXIT_COLOR, PATH_COLOR, OBJECT_COLOR };
 // Can add symbols array if needed
 
