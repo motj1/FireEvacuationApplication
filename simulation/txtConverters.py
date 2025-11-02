@@ -47,7 +47,9 @@ def generateMultiStoryFile(m, dims):
           f.write("     ")
           continue
         for k in range(dims[j][1]):
-          if (m[j][i][k].hasAgent == True):
+          if m[j][i][k].kind == "fire":
+            f.write("F")
+          elif (m[j][i][k].hasAgent == True):
             f.write("P")
           else:
             f.write(parseChar(m[j][i][k].kind))

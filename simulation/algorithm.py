@@ -3,6 +3,9 @@ from Tile import *
 from txtConverters import *
 
 def bfs3D(m, curr, dims):
+  if m[curr.floor][curr.row][curr.col].kind == "fire":
+    return Position3D(-1, -1, -1)
+
   q = []
   visited = [[[False for _ in range(dims[i][1])] for _ in range(dims[i][0])] for i in range(len(dims))]
   prev = [[[Position3D(-1, -1, -1) for _ in range(dims[i][1])] for _ in range(dims[i][0])] for i in range(len(dims))]

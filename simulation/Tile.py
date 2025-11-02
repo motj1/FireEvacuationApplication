@@ -11,6 +11,12 @@ class Tile:
       return False
     else:
       return True
+    
+  def isBurnable(self):
+    if self.kind in ["void", "obst", "strs"]:
+      return True
+    else:
+      return False
 
 class Stairwell(Tile):
   def __init__(self, kind='void', hp="0", hasAgent=False, up=Position3D(-1,-1,-1), down=Position3D(-1,-1,-1)):
