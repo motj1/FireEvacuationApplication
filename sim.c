@@ -32,13 +32,15 @@ ESC[2k                  Erase entire line
 #define FIRE_COLOR 9
 #define EXIT_COLOR 5
 #define PATH_COLOR 1
+#define OBJECT_COLOR 19
 // 229
 
-const int SIZEX = 42, SIZEY = 20;
+const int SIZEX = 42, SIZEY = 40;
 
 uint8_t map[SIZEY][SIZEX];
 
-const uint8_t colours[] = { EMPTY_COLOR, WALL_COLOR, PERSON_COLOR, FIRE_COLOR, EXIT_COLOR, PATH_COLOR };
+const int numColours = 7;
+const uint8_t colours[numColours] = { EMPTY_COLOR, WALL_COLOR, PERSON_COLOR, FIRE_COLOR, EXIT_COLOR, PATH_COLOR, OBJECT_COLOR };
 // Can add symbols array if needed
 
 void printmaze() {
@@ -46,10 +48,10 @@ void printmaze() {
     printf("\t\tFloor 1\t\t\t\t\t\t\tFloor 2\n");
     for (int i=0; i < SIZEY; i++) {
         for (int j=0; j < SIZEX; j++) {
-            if (map[i][j] < 6) printf("\033[48;5;%dm%s\033[0m", colours[map[i][j]], "  ");
+            if (map[i][j] < numColours) printf("\033[48;5;%dm%s\033[0m", colours[map[i][j]], "  ");
             else {
-                if (map[i][j] < 20)
-                    printf("\033[48;5;%dm%s\033[0m", SMOKE_COLOR(map[i][j] - 6), "  ");
+                if (map[i][j] < 14 + numColours)
+                    printf("\033[48;5;%dm%s\033[0m", SMOKE_COLOR(map[i][j] - numColours), "  ");
                 else 
                     printf("\033[48;5;%dm%s\033[0m", PATH_COLOR, "  ");
             }
@@ -88,6 +90,9 @@ void updateMap(char *filename) {
         case '+':
             map[i][j ++] = 5;
             break;
+        case 'O':
+            map[i][j ++] = 6;
+            break;
         case '\n':
             i ++;
             j = 0;
@@ -95,7 +100,7 @@ void updateMap(char *filename) {
         default:
             for (int k = 0; k < 13; k ++) {
                 if (inp == hex[k]) {
-                    map[i][j ++] = k+6;
+                    map[i][j ++] = k+numColours;
                     break;
                 }
             }
@@ -113,7 +118,7 @@ int main(int argc, char *argv[]) {
     while (1) {
         updateMap(argv[1]);
         printmaze();
-        usleep(100);
+        usleep(1000);
     }
 
     return 0;
