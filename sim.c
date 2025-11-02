@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <string.h>
 
 /*
 Ansi escape codes:
@@ -35,41 +36,82 @@ ESC[2k                  Erase entire line
 #define OBJECT_COLOR 19
 // 229
 
-const int SIZEX = 42, SIZEY = 40;
+int SIZEX = 0, SIZEY = 0;
 
-uint8_t map[SIZEY][SIZEX];
+char *floors;
+uint8_t **map;
 
 const int numColours = 7;
 const uint8_t colours[numColours] = { EMPTY_COLOR, WALL_COLOR, PERSON_COLOR, FIRE_COLOR, EXIT_COLOR, PATH_COLOR, OBJECT_COLOR };
 // Can add symbols array if needed
 
+char *buffer;
+
 void printmaze() {
-    printf("\033c");
-    printf("\t\tFloor 1\t\t\t\t\t\t\tFloor 2\n");
+    // printf("\033c");
+    int index = 0;
+    index += sprintf(buffer, "%s\n", floors);
     for (int i=0; i < SIZEY; i++) {
         for (int j=0; j < SIZEX; j++) {
-            if (map[i][j] < numColours) printf("\033[48;5;%dm%s\033[0m", colours[map[i][j]], "  ");
+            if (map[i][j] < numColours) index += sprintf(buffer + index, "\033[48;5;%dm%s\033[0m", colours[map[i][j]], "  ");
             else {
                 if (map[i][j] < 14 + numColours)
-                    printf("\033[48;5;%dm%s\033[0m", SMOKE_COLOR(map[i][j] - numColours), "  ");
+                    index += sprintf(buffer + index, "\033[48;5;%dm%s\033[0m", SMOKE_COLOR(map[i][j] - numColours), "  ");
                 else 
-                    printf("\033[48;5;%dm%s\033[0m", PATH_COLOR, "  ");
+                    index += sprintf(buffer + index, "\033[48;5;%dm%s\033[0m", PATH_COLOR, "  ");
             }
         }
-        printf("\n");
+        index += sprintf(buffer + index, "\n");
     }
+    buffer[index] = 0;
+    printf("\033c%s\n", buffer);
 }
 
 void updateMap(char *filename) {
-    FILE *fp = fopen(filename, "r");
-
+    FILE *fp = fopen(filename, "r+");
     flock(fileno(fp), LOCK_EX);
+    flock(fileno(fp), LOCK_UN);
+    fclose(fp);
+    fp = fopen(filename, "r");
+    // flock(fileno(fp), LOCK_EX);
+
+    int tmpX, tmpY;
+    fscanf(fp, "%d %d\n", &tmpX, &tmpY);
+
+    if (tmpX > 10000 || tmpY > 10000)
+        return;
+
+    if (tmpX != SIZEX || tmpY != SIZEY) {
+        if (SIZEX != 0 && SIZEY != 0) {
+            for (int i = 0; i < SIZEY; i ++) free(map[i]);
+            free(map);
+            free(floors);
+            free(buffer);
+        }
+        SIZEX = tmpX;
+        SIZEY = tmpY;
+        map = malloc(SIZEY * sizeof(uint8_t *));
+        for (int i = 0; i < SIZEY; i ++) map[i] = calloc(SIZEX, sizeof(uint8_t));
+
+        floors = calloc(SIZEX, sizeof(char));
+        buffer = calloc((SIZEX + 1) * (SIZEY + 1), sizeof(char));
+    }
+    int in, iter = 0;
+    while ((in = fgetc(fp)) != EOF) {
+        if (iter >= SIZEX - 1 || (in == '\n' && iter != 0)) break;
+        else if (in == '\n') continue;
+        floors[iter ++] = in;
+    }
+    floors[iter] = 0;
+
     int inp; int i = 0, j = 0;
     char hex[13] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C'};
     while ((inp = fgetc(fp)) != EOF) {
         if (j >= SIZEX) {
             i ++;
             j = 0;
+            while (inp != '\n' && inp != EOF) inp = fgetc(fp);
+            continue;
         } if (i >= SIZEY) break;
         switch(inp) {
         case ' ':
@@ -108,17 +150,25 @@ void updateMap(char *filename) {
         }
     }
 
-    flock(fileno(fp), LOCK_UN);
+    // flock(fileno(fp), LOCK_UN);
     fclose(fp);
 }
 
 int main(int argc, char *argv[]) {
     if (argc < 2) return 1;
+
+    FILE *fp = fopen(argv[1], "r");
+
+    flock(fileno(fp), LOCK_EX);
+
+    sleep(1);
+
+    flock(fileno(fp), LOCK_UN);
     
     while (1) {
         updateMap(argv[1]);
         printmaze();
-        usleep(1000);
+        usleep(100);
     }
 
     return 0;

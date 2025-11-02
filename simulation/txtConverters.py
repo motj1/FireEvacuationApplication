@@ -73,9 +73,6 @@ def generateMultiStoryMap(filename):
 
 # Parse the map array of tiles, m, into a text file to be printed
 def generateFile(m, h, w):
-  with open("map.txt", "r") as f:
-      fcntl.flock(f.fileno(), fcntl.LOCK_EX)
-      sleep(0.5)
   with open("map.txt", "w") as f:
     fcntl.flock(f.fileno(), fcntl.LOCK_EX)
     for i in range(h):
@@ -85,6 +82,7 @@ def generateFile(m, h, w):
         else:
           f.write(parseChar(m[i][j].kind))
       f.write("\n")
+    fcntl.flock(f, fcntl.LOCK_UN)
   return "map.txt"
 
 def generateMultiStoryFile(m, dims):
@@ -94,8 +92,20 @@ def generateMultiStoryFile(m, dims):
     if dims[i][0] > maximumHeight:
       maximumHeight = dims[i][0]
 
+  with open("map.txt", "r") as f:
+    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+    sleep(0.5)
+    fcntl.flock(f, fcntl.LOCK_UN)
   with open("map.txt", "w") as f:
     fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+
+    totalx = 0
+    maxy = 0
+    for i in range(len(dims)):
+      totalx += dims[i][1] + 5
+      if (dims[i][0] >= maxy): 
+        maxy = dims[i][0] + 1
+    f.write(f"{totalx} {maxy}\n")
 
     for j in range(len(dims)):
       for k in range(dims[j][1]):
@@ -123,6 +133,9 @@ def generateMultiStoryFile(m, dims):
         f.write("     ")
       f.write("\n")
 
+    fcntl.flock(f, fcntl.LOCK_UN)
+
+
   return "map.txt"
 
 
@@ -131,6 +144,17 @@ def blockFile(blockTime):
   with open("map.txt", "r") as f:
     fcntl.flock(f.fileno(), fcntl.LOCK_EX)
     sleep(blockTime)
+    fcntl.flock(f, fcntl.LOCK_UN)
+
+def waitForResponse():
+  with open("map.txt", "r+") as f:
+    while True:
+      try:
+          fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+          sleep(0.01)
+          fcntl.flock(f, fcntl.LOCK_UN)
+      except BlockingIOError:
+          break
 
 # Given the kind of a tile, return the appropriate representative character
 def parseChar(kind):

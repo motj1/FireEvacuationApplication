@@ -1,4 +1,4 @@
-import sys
+import sys, os
 from algorithm import *
 from Position import *
 from txtConverters import *
@@ -6,6 +6,9 @@ from Agent import *
 from txtConverters import *
 import time
 
+waitForResponse()
+
+sleep(0.5)
 m, dims, a = generateMultiStoryMap(sys.argv[1])
 printMultiStoryMap(m, dims)
 
@@ -45,6 +48,7 @@ while 1:
   if len(a) == numAgentsFinished:
     break
   tick += 1
-  time.sleep(0.5)
 
 print(f"Simulation completed in {tick} ticks!")
+blockFile(0.5)
+blockFile(10)
