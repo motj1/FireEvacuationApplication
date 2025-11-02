@@ -4,41 +4,6 @@ import re
 from time import sleep
 import fcntl
 
-def generateMultiStoryMap(filename):
-  f = open(filename)
-
-  agents = []
-
-  numFloors = readFileForNumbers(f, 1)
-
-  buildingMap = []
-  floorDimensions = []
-
-  print(numFloors)
-
-  for i in range(numFloors[0]):
-    twoLines = [next(f) for _ in range(2)]
-    text = "".join(twoLines)
-    
-    floorDimensions.append([int(n) for n in re.findall(r'-?\d+', text)])
-
-    print(floorDimensions[i])
-
-    buildingMap.append([[Tile() for _ in range(floorDimensions[i][1])] for _ in range(floorDimensions[i][0])])
-
-    for j in range(floorDimensions[i][0]):
-      for k in range(floorDimensions[i][1] + 1):
-        c = f.read(1)
-        if c == 'P':
-          agents.append(Position3D(i, j, k))
-          buildingMap[i][j][k] = Tile(parseKind(' '), 10, True)
-        elif c == '\n':
-          break
-        else:
-          buildingMap[i][j][k] = Tile(parseKind(c), 10, False)
-    c = f.read(1) 
-  return buildingMap, floorDimensions, agents
-
 def generateMultiStoryFile(m, dims):
   maximumHeight = -1
   
@@ -46,8 +11,20 @@ def generateMultiStoryFile(m, dims):
     if dims[i][0] > maximumHeight:
       maximumHeight = dims[i][0]
 
+  with open("map.txt", "r") as f:
+    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+    sleep(0.5)
+    fcntl.flock(f, fcntl.LOCK_UN)
   with open("map.txt", "w") as f:
     fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+
+    totalx = 0
+    maxy = 0
+    for i in range(len(dims)):
+      totalx += dims[i][1] + 5
+      if (dims[i][0] >= maxy): 
+        maxy = dims[i][0] + 1
+    f.write(f"{totalx} {maxy}\n")
 
     for j in range(len(dims)):
       for k in range(dims[j][1]):
@@ -75,6 +52,9 @@ def generateMultiStoryFile(m, dims):
         f.write("     ")
       f.write("\n")
 
+    fcntl.flock(f, fcntl.LOCK_UN)
+
+
   return "map.txt"
 
 # Block access to map.txt for a given amount of time
@@ -82,6 +62,17 @@ def blockFile(blockTime):
   with open("map.txt", "r") as f:
     fcntl.flock(f.fileno(), fcntl.LOCK_EX)
     sleep(blockTime)
+    fcntl.flock(f, fcntl.LOCK_UN)
+
+def waitForResponse():
+  with open("map.txt", "r+") as f:
+    while True:
+      try:
+          fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+          sleep(0.01)
+          fcntl.flock(f, fcntl.LOCK_UN)
+      except BlockingIOError:
+          break
 
 # Given the kind of a tile, return the appropriate representative character
 def parseChar(kind):

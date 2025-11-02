@@ -6,6 +6,9 @@ from Agent import *
 from txtConverters import *
 import time
 
+waitForResponse()
+
+time.sleep(0.5)
 m, dims, a = generateMultiStoryMapStairs(sys.argv[1])
 printMultiStoryMap(m, dims)
 
@@ -44,6 +47,7 @@ while 1:
   if len(a) == numAgentsFinished:
     break
   tick += 1
-  time.sleep(0.5)
 
 print(f"Simulation completed in {tick} ticks!")
+blockFile(0.5)
+blockFile(10)
