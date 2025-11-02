@@ -40,7 +40,7 @@ def bfs3D(m, curr, dims):
         visited[curr.floor][newRow][newCol] = True
         prev[curr.floor][newRow][newCol] = curr
         q.append(Position3D(curr.floor, newRow, newCol))
-  print("No Path Found!")
+  return Position3D(-1, -1, -1)
 
 def generateInstructionsBFS3D(prev, floor, newRow, newCol):
   instructions = []
@@ -54,4 +54,4 @@ def generateInstructionsBFS3D(prev, floor, newRow, newCol):
     floor = prev[prevFloor][prevRow][col].floor
     row = prev[prevFloor][prevRow][col].row
     col = prev[prevFloor][prevRow][col].col
-  return instructions
+  return instructions[0]

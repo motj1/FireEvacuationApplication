@@ -132,9 +132,6 @@ def generateMultiStoryMapStairs(filename):
           row = stairMappings[stairNumber][1]
           col = stairMappings[stairNumber][2]
 
-          print(stairMappings[stairNumber])
-
-          print(f"adding stairs on floor {i}")
           buildingMap[i][j][k] = Stairwell(parseKind('S'), 10, False, Position3D(-1, -1, -1), Position3D(floor, row, col))
           stairNumber += 1
         elif c == '\n':

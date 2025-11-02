@@ -7,7 +7,7 @@ class Tile:
     self.hasAgent = hasAgent
 
   def isTraversable(self):
-    if self.kind == "wall":
+    if self.kind == "wall" or self.kind == "fire" or self.kind == "obst":
       return False
     else:
       return True
