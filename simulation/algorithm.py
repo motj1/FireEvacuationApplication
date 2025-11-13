@@ -21,11 +21,19 @@ def bfs3D(m, curr, dims):
     if type(m[curr.floor][curr.row][curr.col]) is Stairwell:
       if (m[curr.floor][curr.row][curr.col].down.row >= 0):
         downCell = m[curr.floor][curr.row][curr.col].down
-        if visited[downCell.floor][downCell.row][downCell.col] == True:
-          continue
-        visited[downCell.floor][downCell.row][downCell.col] = True
-        prev[downCell.floor][downCell.row][downCell.col] = curr
-        q.append(downCell)
+        
+        if visited[downCell.floor][downCell.row][downCell.col] != True:
+          visited[downCell.floor][downCell.row][downCell.col] = True
+          prev[downCell.floor][downCell.row][downCell.col] = curr
+          q.append(downCell)
+
+      if (m[curr.floor][curr.row][curr.col].up.row >= 0):
+        upCell = m[curr.floor][curr.row][curr.col].up
+
+        if visited[upCell.floor][upCell.row][upCell.col] != True:
+          visited[upCell.floor][upCell.row][upCell.col] = True
+          prev[upCell.floor][upCell.row][upCell.col] = curr
+          q.append(upCell)
 
     for i in range(len(adjacencyCoords)):
       newRow = curr.row + adjacencyCoords[i][0]

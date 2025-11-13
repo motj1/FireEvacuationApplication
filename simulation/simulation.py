@@ -29,6 +29,11 @@ def spreadFire(m, dims):
               downCell = m[d.floor][d.row][d.col]
               if downCell.isBurnable() and spreadHappens():
                 tilesSpreadTo.append(m[d.floor][d.row][d.col])
+            if (m[i][j][k].up.row >= 0):
+              u = m[i][j][k].up
+              upCell = m[u.floor][u.row][u.col]
+              if upCell.isBurnable() and spreadHappens():
+                tilesSpreadTo.append(m[u.floor][u.row][u.col])
 
   for tile in tilesSpreadTo:
     tile.kind = "fire"

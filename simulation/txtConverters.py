@@ -132,11 +132,16 @@ def generateMultiStoryMapStairs(filename):
           agents.append(Position3D(i, j, k))
           buildingMap[i][j][k] = Tile(parseKind(' '), 10, True)
         elif c == 'S':
-          floor = stairMappings[stairNumber][0]
-          row = stairMappings[stairNumber][1]
-          col = stairMappings[stairNumber][2]
+          fDown = stairMappings[stairNumber][0]
+          rDown = stairMappings[stairNumber][1]
+          cDown = stairMappings[stairNumber][2]
+          fUp = stairMappings[stairNumber][3]
+          rUp = stairMappings[stairNumber][4]
+          cUp = stairMappings[stairNumber][5]
 
-          buildingMap[i][j][k] = Stairwell(parseKind('S'), 10, False, Position3D(-1, -1, -1), Position3D(floor, row, col))
+          print(f"{fUp}, {rUp}, {cUp}")
+
+          buildingMap[i][j][k] = Stairwell(parseKind('S'), 10, False, Position3D(fUp, rUp, cUp), Position3D(fDown, rDown, cDown))
           stairNumber += 1
         elif c == '\n':
           break
