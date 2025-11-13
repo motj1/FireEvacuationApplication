@@ -8,7 +8,7 @@ import time
 import random
 
 def spreadFire(m, dims):
-  tilesSpreadTo = [];
+  tilesSpreadTo = []
 
   for i in range(len(dims)):
     for j in range(dims[i][0]):
@@ -38,7 +38,7 @@ def spreadHappens():
 
 # waitForResponse()
 
-# time.sleep(0.5)``
+# time.sleep(0.5)
 m, dims, a = generateMultiStoryMapStairs(sys.argv[1])
 printMultiStoryMap(m, dims)
 
