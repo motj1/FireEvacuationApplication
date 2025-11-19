@@ -6,6 +6,7 @@ from Agent import *
 from txtConverters import *
 import random
 from tabulate import tabulate
+import time
 
 def spreadFire(m, dims):
   tilesSpreadTo = []
