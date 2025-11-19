@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/file.h>
+#include <sys/stat.h>
+#include <CommonCrypto/CommonDigest.h>
 
 /*
 Ansi escape codes:
@@ -48,6 +50,33 @@ const uint8_t colours[numColours] = { EMPTY_COLOR, WALL_COLOR, PERSON_COLOR, FIR
 // Can add symbols array if needed
 
 char *buffer;
+
+// SHA256 hash function for file contents
+void hashFile(char *filename, unsigned char *hash_out) {
+    FILE *fp = fopen(filename, "r");
+    if (!fp) {
+        memset(hash_out, 0, CC_SHA256_DIGEST_LENGTH);
+        return;
+    }
+    
+    flock(fileno(fp), LOCK_SH);
+    
+    // Get file size
+    fseek(fp, 0, SEEK_END);
+    long file_size = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+    
+    // Read entire file
+    unsigned char *file_contents = malloc(file_size);
+    fread(file_contents, 1, file_size, fp);
+    
+    // Hash it all at once
+    CC_SHA256(file_contents, (CC_LONG)file_size, hash_out);
+    
+    free(file_contents);
+    flock(fileno(fp), LOCK_UN);
+    fclose(fp);
+}
 
 void printmaze() {
     // printf("\033c");
@@ -169,11 +198,22 @@ int main(int argc, char *argv[]) {
     sleep(1);
 
     flock(fileno(fp), LOCK_UN);
+    fclose(fp);
+    
+    unsigned char prevHash[CC_SHA256_DIGEST_LENGTH];
+    unsigned char currentHash[CC_SHA256_DIGEST_LENGTH];
+    memset(prevHash, 0, CC_SHA256_DIGEST_LENGTH);
     
     while (1) {
-        updateMap(argv[1]);
-        printmaze();
-        usleep(100);
+        hashFile(argv[1], currentHash);
+        
+        if (memcmp(currentHash, prevHash, CC_SHA256_DIGEST_LENGTH) != 0) {
+            updateMap(argv[1]);
+            printmaze();
+            memcpy(prevHash, currentHash, CC_SHA256_DIGEST_LENGTH);
+        }
+        
+        usleep(100); // 100 microseconds sleep
     }
 
     return 0;
