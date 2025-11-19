@@ -94,19 +94,23 @@ def calculate_h_value(src, dests):
     return min([calculate_h_value_single(src, dest) for dest in dests])
 
 def generatePathAStar3D(cell_details, dest):
-  instructions = []
-  floor = dest.floor
-  row = dest.row
-  col = dest.col
+    instructions = []
+    floor = dest.floor
+    row = dest.row
+    col = dest.col
 
-  while cell_details[floor][row][col].parent_i != row or cell_details[floor][row][col].parent_j != col or cell_details[floor][row][col].parent_k != floor:
-    instructions.append(Position3D(floor, row, col))
-    prevRow = row
-    prevFloor = floor
-    floor = cell_details[floor][row][col].parent_k
-    row = cell_details[prevFloor][row][col].parent_i
-    col = cell_details[prevFloor][prevRow][col].parent_j
-  return instructions
+    while cell_details[floor][row][col].parent_i != row or cell_details[floor][row][col].parent_j != col or cell_details[floor][row][col].parent_k != floor:
+        instructions.append(Position3D(floor, row, col))
+        prevRow = row
+        prevFloor = floor
+        floor = cell_details[floor][row][col].parent_k
+        row = cell_details[prevFloor][row][col].parent_i
+        col = cell_details[prevFloor][prevRow][col].parent_j
+    
+    if (len(instructions) == 0):
+        print("Screams ...")
+        return Position3D(-1, -1, -1)
+    return instructions[-1]
 
 def astar(map, src, dims):
     if map[src.floor][src.row][src.col].kind == "fire":
@@ -123,8 +127,6 @@ def astar(map, src, dims):
                 dests = [Position3D(src.floor, i, j)]
                 foundExit = True
 
-
-    q = []
     closed_list = [[[False for _ in range(dims[i][1])] for _ in range(dims[i][0])] for i in range(len(dims))]
     cell_details = [[[Cell() for _ in range(dims[i][1])] for _ in range(dims[i][0])] for i in range(len(dims))]
 
@@ -160,10 +162,11 @@ def astar(map, src, dims):
             new_j = map[k][i][j].down.col
             if is_valid(new_k, new_i, new_j, dims) and map[new_k][new_i][new_j].isTraversable() and not closed_list[new_k][new_i][new_j]:
                 if map[new_k][new_i][new_j].kind == "exit":
-                    cell_details[k][new_i][new_j].parent_i = i
-                    cell_details[k][new_i][new_j].parent_j = j
+                    cell_details[new_k][new_i][new_j].parent_i = i
+                    cell_details[new_k][new_i][new_j].parent_j = j
+                    cell_details[new_k][new_i][new_j].parent_k = k
                     found_dest = True
-                    return # gen path
+                    return generatePathAStar3D(cell_details, Position3D(new_k, new_i, new_j))# gen path
                 else:
                     # Calculate the new f, g, and h values
                     g_new = cell_details[k][i][j].g + 1.0
@@ -188,8 +191,9 @@ def astar(map, src, dims):
                     if map[k][new_i][new_j].kind == "exit":
                         cell_details[k][new_i][new_j].parent_i = i
                         cell_details[k][new_i][new_j].parent_j = j
+                        cell_details[k][new_i][new_j].parent_k = k
                         found_dest = True
-                        return generatePathAStar3D(cell_details, Position3D(k, i, j))# gen path
+                        return generatePathAStar3D(cell_details, Position3D(k, new_i, new_j))# gen path
                     else:
                         # Calculate the new f, g, and h values
                         g_new = cell_details[k][i][j].g + 1.0

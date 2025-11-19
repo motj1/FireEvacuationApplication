@@ -65,7 +65,7 @@ while 1:
     if finished[i] == True:
       nextInstructions.append(Position3D(-1, -1, -1))
       continue
-    nextInstruction = bfs3D(m, a[i], dims)
+    nextInstruction = astar(m, a[i], dims)#bfs3D(m, a[i], dims)
 
     if nextInstruction.floor == -1:
       trapped += 1

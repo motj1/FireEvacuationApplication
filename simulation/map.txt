@@ -1,25 +1,9 @@
-40 24
-F0                                      
-#############            ##########     
-#        F  #            #        #     
-#FFF FF FF  #            #        #     
-#FFFFFFFFF  ######EE######        #     
-#FFFFFFFF F                       #     
-#FFFFFFFFF                        #     
-#FFFFFFFF FF                      #     
-#FFFFFFFFFF                       #     
-#FFFFFFFFFFF     OOO OO           #     
-#FFFFFFFFF FF                     #     
-#FFFFFFFFFFF######EE######        #     
-#FFFFFFFFFF #            #        #     
-#FFFFFFFFFFF#            #        #     
-#FFFFFFFFFFF#            #####E####     
-#FFFFFFFFF F#                           
-#FFFFFFFFFFF#                           
-#FFFFFFFFF  #                           
-#FFFFFFFFF  #                           
-#FFFFFFFFF  #                           
-#FFFFFFFF   #                           
-#FFFFFFFF   #                           
-#F F FFF    #                           
-#####E#######                           
+118 8
+F0                                                                           F1                                       
+########################################################################     ##############                           
+#S                                                                     #     #S           #                           
+#F                                                                     #     #            #                           
+# F                                                                    #     #            #                           
+#                                                                     S#     #            #######################     
+################################## #####################################     #   P                             S#     
+                                 #E#                                         ####################################     
