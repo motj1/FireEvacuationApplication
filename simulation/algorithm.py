@@ -183,33 +183,32 @@ def astar(map, src, dims):
                         cell_details[new_k][new_i][new_j].parent_k = k
                         cell_details[new_k][new_i][new_j].parent_i = i
                         cell_details[new_k][new_i][new_j].parent_j = j
-        else:
-            for dir in adjacencyCoords:
-                new_i = i + dir[0]
-                new_j = j + dir[1]
-                if is_valid(k, new_i, new_j, dims) and map[k][new_i][new_j].isTraversable() and not closed_list[k][new_i][new_j]:
-                    if map[k][new_i][new_j].kind == "exit":
+        for dir in adjacencyCoords:
+            new_i = i + dir[0]
+            new_j = j + dir[1]
+            if is_valid(k, new_i, new_j, dims) and map[k][new_i][new_j].isTraversable() and not closed_list[k][new_i][new_j]:
+                if map[k][new_i][new_j].kind == "exit":
+                    cell_details[k][new_i][new_j].parent_i = i
+                    cell_details[k][new_i][new_j].parent_j = j
+                    cell_details[k][new_i][new_j].parent_k = k
+                    found_dest = True
+                    return generatePathAStar3D(cell_details, Position3D(k, new_i, new_j))# gen path
+                else:
+                    # Calculate the new f, g, and h values
+                    g_new = cell_details[k][i][j].g + 1.0
+                    h_new = calculate_h_value(Position3D(k, new_i, new_j), dests)
+                    f_new = g_new + h_new
+
+                    if cell_details[k][new_i][new_j].f == float('inf') or cell_details[k][new_i][new_j].f > f_new:
+                        # Add the cell to the open list
+                        heapq.heappush(open_list, (f_new, k, new_i, new_j))
+                        # Update the cell details
+                        cell_details[k][new_i][new_j].f = f_new
+                        cell_details[k][new_i][new_j].g = g_new
+                        cell_details[k][new_i][new_j].h = h_new
+                        cell_details[k][new_i][new_j].parent_k = k
                         cell_details[k][new_i][new_j].parent_i = i
                         cell_details[k][new_i][new_j].parent_j = j
-                        cell_details[k][new_i][new_j].parent_k = k
-                        found_dest = True
-                        return generatePathAStar3D(cell_details, Position3D(k, new_i, new_j))# gen path
-                    else:
-                        # Calculate the new f, g, and h values
-                        g_new = cell_details[k][i][j].g + 1.0
-                        h_new = calculate_h_value(Position3D(k, new_i, new_j), dests)
-                        f_new = g_new + h_new
-
-                        if cell_details[k][new_i][new_j].f == float('inf') or cell_details[k][new_i][new_j].f > f_new:
-                            # Add the cell to the open list
-                            heapq.heappush(open_list, (f_new, k, new_i, new_j))
-                            # Update the cell details
-                            cell_details[k][new_i][new_j].f = f_new
-                            cell_details[k][new_i][new_j].g = g_new
-                            cell_details[k][new_i][new_j].h = h_new
-                            cell_details[k][new_i][new_j].parent_k = k
-                            cell_details[k][new_i][new_j].parent_i = i
-                            cell_details[k][new_i][new_j].parent_j = j
 
 
     return Position3D(-1, -1, -1)
