@@ -51,7 +51,7 @@ printMultiStoryMap(m, dims)
 agentInstructions = []
 
 for i in range(len(a)):
-  agentInstructions.append(bfs3D(m, a[i], dims))
+  agentInstructions.append(astar(m, a[i], dims))#bfs3D(m, a[i], dims))
 
 tick = 0
 trapped = 0
