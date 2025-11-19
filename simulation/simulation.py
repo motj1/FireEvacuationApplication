@@ -4,8 +4,8 @@ from Position import *
 from txtConverters import *
 from Agent import *
 from txtConverters import *
-import time
 import random
+from tabulate import tabulate
 
 def spreadFire(m, dims):
   tilesSpreadTo = []
@@ -100,13 +100,10 @@ while 1:
 
   tick += 1
 
-print(f"Simulation completed in {tick} ticks!")
-if trapped == 1:
-  print(f"There was {trapped} person trapped")
-else:
-  print(f"There were {trapped} people trapped")
-if len(a) - trapped == 1:
-  print(f"{len(a) - trapped} person escaped")
-else:
-  print(f"{len(a) - trapped} people escaped")
-blockFile(10)
+data = [
+    ["Evacuated", len(a) - trapped],
+    ["Trapped", trapped],
+]
+headers = ["Status", "# People"]
+print(tabulate(data, headers=headers, tablefmt="fancy_grid"))
+print(f"Simulation finished in {tick} tick(s)!")

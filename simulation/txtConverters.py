@@ -126,7 +126,7 @@ def generateMultiStoryMapStairs(filename):
     stairNumber = 0
 
     for j in range(floorDimensions[i][0]):
-      for k in range(floorDimensions[i][1] + 1):
+      for k in range(floorDimensions[i][1]+1):
         c = f.read(1)
         if c == 'P':
           agents.append(Position3D(i, j, k))
@@ -138,8 +138,6 @@ def generateMultiStoryMapStairs(filename):
           fUp = stairMappings[stairNumber][3]
           rUp = stairMappings[stairNumber][4]
           cUp = stairMappings[stairNumber][5]
-
-          print(f"{fUp}, {rUp}, {cUp}")
 
           buildingMap[i][j][k] = Stairwell(parseKind('S'), 10, False, Position3D(fUp, rUp, cUp), Position3D(fDown, rDown, cDown))
           stairNumber += 1
