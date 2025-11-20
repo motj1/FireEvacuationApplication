@@ -91,7 +91,12 @@ def parseChar(kind):
   elif kind[0:5] == "smoke":
     # we subtract 1 since range goes from smoke1-smoke5 
     # but we want colours to range from 0-4
-    return str(int(kind[5])-1) 
+    if kind[5].isdigit():
+      return str(int(kind[5])-1) 
+    else:
+      intMap = {9: "9", 10:"A", 11:"B", 12:"C", 13:"D"}
+      charMap = {"A":10, "B":11, "C":12, "D":13}
+      return intMap[charMap[kind[5]]-1]
   elif kind == 'obst':
     return 'O'
   elif kind == "exit":
