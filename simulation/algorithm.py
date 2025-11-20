@@ -183,7 +183,7 @@ def calculate_dests(map, dims):
                 if (map[k][i][j].hasAgent):
                     g_new += 5
                 if (map[k][i][j].kind[0:-1] == "smoke"):
-                    g_new += 1 * int(map[k][i][j].kind[-1])
+                    g_new += 1 * (13 - int(map[k][i][j].kind[-1], 16))
                 # if (map[k][i][j].kind == "fire"):
                 #     g_new += 1000
                 if cell_details[k][new_i][new_j].g == float('inf') or cell_details[k][new_i][new_j].g > g_new:
@@ -206,13 +206,13 @@ def astar(map, src, dims):
     found_exit = False
     dests = []
 
-    for i in range(dims[floor][0]):
-        for j in range(dims[floor][1]):
-            if ((map[floor][i][j]).kind == "exit" and not found_exit):
+    for i in range(dims[src.floor][0]):
+        for j in range(dims[src.floor][1]):
+            if ((map[src.floor][i][j]).kind == "exit" and not found_exit):
                 dests = []
                 found_exit = True
-            if (type(map[floor][i][j]) is Stairwell and not found_exit) or ((map[floor][i][j]).kind == "exit"):
-                dests.append(Position3D(floor, i, j))
+            if (type(map[src.floor][i][j]) is Stairwell and not found_exit) or ((map[src.floor][i][j]).kind == "exit"):
+                dests.append(Position3D(src.floor, i, j))
             
 
     closed_list = [[[False for _ in range(dims[i][1])] for _ in range(dims[i][0])] for i in range(len(dims))]
