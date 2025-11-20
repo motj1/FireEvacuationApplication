@@ -82,6 +82,8 @@ def waitForResponse():
 def parseChar(kind):
   if kind == "wall":
     return '#'
+  elif kind == "internal_wall":
+    return '|'
   elif kind == "void":
     return ' '
   elif kind == "fire":
@@ -105,7 +107,7 @@ def parseChar(kind):
 
 def printMultiStoryMap(m, dims):
   generateMultiStoryFile(m, dims)
-  # print(open("map.txt").read())
+  print(open("map.txt").read())
 
 def generateMultiStoryMapStairs(filename):
   f = open(filename)

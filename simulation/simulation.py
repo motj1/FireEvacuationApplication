@@ -21,28 +21,31 @@ def spreadFire(m, dims):
             row = j + coord[0]
             col = k + coord[1]
 
-            if m[i][row][col].isBurnable() and spreadHappens():
+            probability = m[i][row][col].getBurnProbability()
+            if spreadHappens(probability):
               tilesSpreadTo.append(m[i][row][col])
 
           if type(m[i][j][k]) is Stairwell:
             if (m[i][j][k].down.row >= 0):
               d = m[i][j][k].down
               downCell = m[d.floor][d.row][d.col]
-              if downCell.isBurnable() and spreadHappens():
+              probability = downCell.getBurnProbability()
+              if spreadHappens(probability):
                 tilesSpreadTo.append(m[d.floor][d.row][d.col])
             if (m[i][j][k].up.row >= 0):
               u = m[i][j][k].up
               upCell = m[u.floor][u.row][u.col]
-              if upCell.isBurnable() and spreadHappens():
+              probability = upCell.getBurnProbability()
+              if spreadHappens(probability):
                 tilesSpreadTo.append(m[u.floor][u.row][u.col])
 
   for tile in tilesSpreadTo:
     tile.kind = "fire"
 
-def spreadHappens():
-  return random.randint(1, 8) <= 1
+def spreadHappens(probability):
+  return random.random() >= (1 - probability)
 
-waitForResponse()
+#waitForResponse()
 
 time.sleep(0.5)
 m, dims, a = generateMultiStoryMapStairs(sys.argv[1])

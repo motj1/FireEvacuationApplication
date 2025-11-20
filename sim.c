@@ -181,7 +181,7 @@ int updateMap(char *filename) {
         case ' ':
             map[i][j ++] = 0;
             break;
-        case '#':
+        case '#' || '|':
             map[i][j ++] = 1;
             break;
         case 'P':
