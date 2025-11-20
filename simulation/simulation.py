@@ -8,11 +8,18 @@ from tabulate import tabulate
 import time
 from fire import *
 
-waitForResponse()
+if (len(sys.argv) > 2):
+  printPython = 0
+else:
+  printPython = 1
 
-time.sleep(2)
+if (not printPython):
+  waitForResponse()
+
+  time.sleep(2)
 m, dims, a = generateMultiStoryMapStairs(sys.argv[1])
-printMultiStoryMap(m, dims)
+
+printMultiStoryMap(m, dims, printPython)
 
 waitGraph = []
 for i in range(len(dims)):
@@ -41,7 +48,7 @@ while 1:
     if finished[i] == True:
       nextInstructions.append(Position3D(-1, -1, -1))
       continue
-    nextInstruction = bfsPredictive(m, depth_maps, a[i], dims) #bfs3D(m, a[i], dims) astar(m, a[i], dims)   
+    nextInstruction = nextmove(a[i], cell_details) #bfsPredictive(m, depth_maps, a[i], dims) bfs3D(m, a[i], dims) astar(m, a[i], dims)   
 
     if nextInstruction.floor == -1:
       trapped += 1
@@ -67,7 +74,7 @@ while 1:
       m[agent.floor][agent.row][agent.col].hasAgent = False
       finished[a.index(agent)] = True
 
-  printMultiStoryMap(m, dims)
+  printMultiStoryMap(m, dims, printPython)
 
   numAgentsFinished = 0
   for i in range(len(finished)):

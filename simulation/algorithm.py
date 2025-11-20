@@ -128,7 +128,6 @@ def calculate_dests(map, dims):
                 if (map[floor][i][j].kind == "exit"):
                     exits.append(Position3D(floor, i, j))
     
-    q = []
     closed_list = [[[False for _ in range(dims[i][1])] for _ in range(dims[i][0])] for i in range(len(dims))]
     adjacencyCoords = [[0, 1], [1, 0], [0, -1], [-1, 0], [-1, -1], [1, 1], [-1, 1], [1, -1]]
     diagonals = [[-1, -1], [1, 1], [-1, 1], [1, -1]]
