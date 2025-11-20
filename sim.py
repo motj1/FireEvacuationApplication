@@ -2,10 +2,6 @@
 """
 Fire Evacuation Simulation Visualizer
 Python version of sim.c
-
-This program reads a map file and visualizes a fire evacuation simulation
-using ANSI color codes in the terminal. It continuously monitors the file
-for changes and updates the display accordingly.
 """
 
 import sys
@@ -51,8 +47,13 @@ floors = ""
 
 
 def smoke_color(smoke_index):
-    """Calculate smoke color based on smoke intensity (0-12)"""
-    return 255 - (min(smoke_index, 13))
+    """Calculate smoke color based on smoke intensity (0-12), gray to light gray"""
+    # Use ANSI 256-color grayscale from 242 (gray) to 255 (very light gray)
+    # Good starting darkness with lighter end for better visibility gradient
+    index = min(smoke_index, 13)
+    gray = 243
+    light_gray = 255
+    return gray + int((light_gray - gray) * (index / 13))
 
 
 def hash_file(filename):
@@ -228,7 +229,6 @@ def main():
     
     prev_hash = 0
     
-    # Main loop - monitor file for changes
     while True:
         try:
             current_hash = hash_file(filename)

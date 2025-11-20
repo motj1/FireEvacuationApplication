@@ -165,7 +165,7 @@ def generate_map(seed, floors, width, height, output_file, num_people=None, num_
                             # Draw perimeter walls only
                             if r == room_r or r == room_r + room_height - 1 or c == room_c or c == room_c + room_width - 1:
                                 if grid[r][c] == ' ':
-                                    grid[r][c] = '#'
+                                    grid[r][c] = '|'
                     
                     # Add 1-2 doors per room
                     num_doors = random.randint(1, 2)
