@@ -12,7 +12,6 @@ from fire import *
 
 algos = ["bfs", "bfsPred", "astar", "nextMove"]
 algo = sys.argv[1]
-printPython = sys.argv[3]
 
 if algo not in algos:
   print("Please choose a valid algorithm")
@@ -20,7 +19,7 @@ if algo not in algos:
 
 m, dims, a = generateMultiStoryMapStairs(sys.argv[2])
 
-printMultiStoryMap(m, dims, printPython)
+printMultiStoryMap(m, dims, True)
 
 waitGraph = []
 for i in range(len(dims)):
@@ -87,7 +86,7 @@ while 1:
       m[agent.floor][agent.row][agent.col].hasAgent = False
       finished[a.index(agent)] = True
 
-  printMultiStoryMap(m, dims, printPython)
+  printMultiStoryMap(m, dims, True)
 
   numAgentsFinished = 0
   for i in range(len(finished)):
