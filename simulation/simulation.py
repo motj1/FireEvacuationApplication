@@ -10,7 +10,7 @@ from tabulate import tabulate
 import time
 from fire import *
 
-waitForResponse()
+#waitForResponse()
 
 sleep(0.5)
 
@@ -81,8 +81,11 @@ while 1:
           adjacentTile = m[a[i].floor][a[i].row + coords[0]][a[i].col + coords[1]]
           if adjacentTile.isTraversable():
             traversableCoords.append(Position3D(a[i].floor, a[i].row + coords[0], a[i].col + coords[1]))
-        randCoord = traversableCoords[random.randint(0, len(traversableCoords)-1)]
-        nextInstruction = Position3D(a[i].floor, randCoord.row, randCoord.col)
+        if len(traversableCoords) != 0:
+          randCoord = traversableCoords[random.randint(1, len(traversableCoords))-1]
+          nextInstruction = Position3D(a[i].floor, randCoord.row, randCoord.col)
+        else:
+          nextInstruction = Position3D(-1, -1, -1)
     #---------------------------------------------------
 
     if nextInstruction.floor == -1:
