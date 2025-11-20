@@ -1,9 +1,9 @@
 118 8
 F0                                                                           F1                                       
 ########################################################################     ##############                           
+#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF                                       #     #FFFFFFFFFFFF#                           
 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF                                      #     #FFFFFFFFFFFF#                           
-#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF                                     #     #FFFFFFFFFFFF#                           
-#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF                                     #     #FFFFFFFFFFFF#                           
-#FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF                                      S#     #FFFFFFFFFFFF#######################     
-################################## #####################################     #FFFFFFFFFFFFFFFFFFFF             S#     
+#FFFFFFFFFFFFFFFFFFFFFFFFFFFF F                                        #     #FFFFFFFFFFFF#                           
+#FFFFFFFFFFFFFFFFFFFFFFFFF FFFF                                       S#     #FFFFFFFFFFFF#######################     
+################################## #####################################     #FFFFFFFFFFFFFFFFF                S#     
                                  #E#                                         ####################################     

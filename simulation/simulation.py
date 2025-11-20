@@ -6,6 +6,7 @@ from Agent import *
 from txtConverters import *
 import random
 from tabulate import tabulate
+import time
 
 def spreadFire(m, dims):
   tilesSpreadTo = []
@@ -51,7 +52,7 @@ printMultiStoryMap(m, dims)
 agentInstructions = []
 
 for i in range(len(a)):
-  agentInstructions.append(astar(m, a[i], dims))#bfs3D(m, a[i], dims))
+  agentInstructions.append(astar(m, a[i], dims))# bfs3D(m, a[i], dims))
 
 tick = 0
 trapped = 0
@@ -65,7 +66,7 @@ while 1:
     if finished[i] == True:
       nextInstructions.append(Position3D(-1, -1, -1))
       continue
-    nextInstruction = astar(m, a[i], dims)#bfs3D(m, a[i], dims)
+    nextInstruction = astar(m, a[i], dims) #bfs3D(m, a[i], dims) #
 
     if nextInstruction.floor == -1:
       trapped += 1
