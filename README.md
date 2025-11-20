@@ -85,19 +85,15 @@ According to `Standard.md`, the following symbols are used:
 
 ### Running the Simulation
 
-1. **Run the Python simulation:**
+1. **Run the Python simulation :**
    ```bash
-   python3 simulation/simulation.py <map_file>
-   ```
-
-   Example:
-   ```bash
-   python3 simulation/simulation.py simulation/maps/map_1.txt
+   cd simulation
+   python3 simulation.py <map_file>
    ```
 
 2. **View the visualisation (in a separate terminal):**
    ```bash
-   ./sim <map_file>
+   ./sim simulation/map.txt
    ```
 
    The visualisation program reads the map file and displays it with color-coded tiles, updating in real-time as the simulation progresses.
