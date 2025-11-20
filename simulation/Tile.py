@@ -7,13 +7,13 @@ class Tile:
     self.hasAgent = hasAgent
 
   def isTraversable(self):
-    if self.kind == "wall" or self.kind == "fire" or self.kind == "obst":
+    if self.kind in ["wall", "fire", "obst"]:
       return False
     else:
       return True
     
   def isBurnable(self):
-    if self.kind in ["void", "obst", "strs"]:
+    if self.kind in ["void", "obst", "strs"] + [f"smoke{i}" for i in range(1,6)]:
       return True
     else:
       return False
@@ -38,5 +38,7 @@ def parseKind(c):
     return "exit"
   elif c == 'S':
     return "strs"
+  elif c in ["i" for i in range(1,6)]:# or c in ['A', 'B', 'C']:
+    return "smoke" + c
   else:  
     return "err"

@@ -86,6 +86,10 @@ def parseChar(kind):
     return ' '
   elif kind == "fire":
     return 'F'
+  elif kind[0:5] == "smoke":
+    # we subtract 1 since range goes from smoke1-smoke5 
+    # but we want colours to range from 0-4
+    return str(int(kind[5])-1) 
   elif kind == 'obst':
     return 'O'
   elif kind == "exit":
