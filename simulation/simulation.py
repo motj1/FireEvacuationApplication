@@ -17,8 +17,8 @@ if algo not in algos:
   print("Please choose a valid algorithm")
   exit()
 
-m, dims, a = generateMultiStoryMapStairs(sys.argv[2])
-
+# time.sleep(1)
+m, dims, a = generateMultiStoryMapStairs(sys.argv[1])
 printMultiStoryMap(m, dims, True)
 
 waitGraph = []
