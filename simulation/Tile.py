@@ -7,13 +7,13 @@ class Tile:
     self.hasAgent = hasAgent
 
   def isTraversable(self):
-    if self.kind == "wall" or self.kind == "fire" or self.kind == "obst" or self.kind == "internal_wall":
+    if self.kind in ["wall", "fire", "obst", "internal_wall"]:
       return False
     else:
       return True
     
   def getBurnProbability(self):
-    if self.kind in ["void"]:
+    if self.kind in ["void"] + [f"smoke{i}" for i in range(1,6)]:
       return 0.125
     elif self.kind in ["obst", "door"]:
       return 0.0625
@@ -48,5 +48,7 @@ def parseKind(c):
     return "door"
   elif c == 'D':
     return 'frdr'
+  elif c in ["i" for i in range(1,6)]:# or c in ['A', 'B', 'C']:
+    return "smoke" + c
   else:  
     return "err"

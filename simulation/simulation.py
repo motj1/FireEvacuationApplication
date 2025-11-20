@@ -4,6 +4,8 @@ from Position import *
 from txtConverters import *
 from Agent import *
 from txtConverters import *
+from Smoke import *
+import random
 from tabulate import tabulate
 import time
 from fire import *
@@ -40,7 +42,8 @@ while 1:
   nextInstructions = []
 
   spreadFire(m, dims, 0.1)
-  
+  spreadSmoke(m, dims)
+
   cell_details = calculate_dests(m, dims)
   # depth_maps = getPredictiveMaps(m, dims, 3, 2)
 
