@@ -30,7 +30,7 @@ ESC[2k                  Erase entire line
 
 #define WALL_COLOR 0
 #define EMPTY_COLOR 231
-#define SMOKE_COLOR(smoke_index) (242 + (((smoke_index) < 13) ? (smoke_index) : 13))
+#define SMOKE_COLOR(smoke_index) (241 + (((smoke_index) < 13) ? (smoke_index) : 13))
 #define PERSON_COLOR 136 
 #define FIRE_COLOR 9
 #define EXIT_COLOR 34
@@ -45,6 +45,7 @@ int SIZEX = 0, SIZEY = 0;
 
 char *floors;
 uint8_t **map;
+uint8_t **Prevmap;
 
 #define numColours 10
 const uint8_t colours[numColours] = { EMPTY_COLOR, WALL_COLOR, PERSON_COLOR, FIRE_COLOR, EXIT_COLOR, PATH_COLOR, OBJECT_COLOR, STAIR_COLOR, DOOR_COLOR, FIRE_DOOR_COLOR };
@@ -54,42 +55,42 @@ char *buffer;
 
 // Custom hash function for file contents
 // This uses a combination of FNV-1a and polynomial rolling hash
-uint64_t hashFile(char *filename) {
-    FILE *fp = fopen(filename, "r");
-    if (!fp) return 0;
+// uint64_t hashFile(char *filename) {
+//     FILE *fp = fopen(filename, "r");
+//     if (!fp) return 0;
     
-    flock(fileno(fp), LOCK_SH);
+//     flock(fileno(fp), LOCK_SH);
     
-    // FNV-1a constants
-    uint64_t hash = 14695981039346656037ULL; // FNV offset basis
-    const uint64_t fnv_prime = 1099511628211ULL;
+//     // FNV-1a constants
+//     uint64_t hash = 14695981039346656037ULL; // FNV offset basis
+//     const uint64_t fnv_prime = 1099511628211ULL;
     
-    // Additional polynomial hash for mixing
-    uint64_t poly_hash = 0;
-    const uint64_t poly_prime = 31;
+//     // Additional polynomial hash for mixing
+//     uint64_t poly_hash = 0;
+//     const uint64_t poly_prime = 31;
     
-    int c;
-    uint64_t position = 1;
+//     int c;
+//     uint64_t position = 1;
     
-    while ((c = fgetc(fp)) != EOF) {
-        // FNV-1a hash
-        hash ^= (uint64_t)c;
-        hash *= fnv_prime;
+//     while ((c = fgetc(fp)) != EOF) {
+//         // FNV-1a hash
+//         hash ^= (uint64_t)c;
+//         hash *= fnv_prime;
         
-        // Polynomial hash with position weight
-        poly_hash = poly_hash * poly_prime + c * position;
-        position++;
-    }
+//         // Polynomial hash with position weight
+//         poly_hash = poly_hash * poly_prime + c * position;
+//         position++;
+//     }
     
-    // Combine both hashes with XOR and rotation for better distribution
-    hash ^= poly_hash;
-    hash ^= (poly_hash >> 32);
+//     // Combine both hashes with XOR and rotation for better distribution
+//     hash ^= poly_hash;
+//     hash ^= (poly_hash >> 32);
     
-    flock(fileno(fp), LOCK_UN);
-    fclose(fp);
+//     flock(fileno(fp), LOCK_UN);
+//     fclose(fp);
     
-    return hash;
-}
+//     return hash;
+// }
 
 void printmaze() {
     // printf("\033c");
@@ -97,6 +98,7 @@ void printmaze() {
     index += sprintf(buffer, "%s\n", floors);
     for (int i=0; i < SIZEY; i++) {
         for (int j=0; j < SIZEX; j++) {
+            Prevmap[i][j] = map[i][j];
             if (map[i][j] < numColours) index += sprintf(buffer + index, "\033[48;5;%dm%s\033[0m", colours[map[i][j]], "  ");
             else {
                 if (map[i][j] < 14 + numColours)
@@ -111,22 +113,51 @@ void printmaze() {
     printf("\033c%s\n", buffer);
 }
 
-void updateMap(char *filename) {
+void printmazediff() {
+    for (int i=0; i < SIZEY; i++) {
+        for (int j=0; j < SIZEX; j++) {
+            if (map[i][j] != Prevmap[i][j]) {
+                // printf("Diff ad %d %d\n", i, j);
+                // ESC[{line};{column}H    move to line column
+                if (map[i][j] < numColours) {
+                    printf("\033[%d;%dH\033[48;5;%dm%s\033[0m", i + 2, j * 2 + 1, colours[map[i][j]], "  ");
+                } else {
+                    if (map[i][j] < 14 + numColours)
+                        printf("\033[%d;%dH\033[48;5;%dm%s\033[0m", i + 2, j * 2 + 1, SMOKE_COLOR(map[i][j] - numColours), "  ");
+                    else 
+                        printf("\033[%d;%dH\033[48;5;%dm%s\033[0m", i + 2, j * 2 + 1, PATH_COLOR, "  ");
+                }
+                Prevmap[i][j] = map[i][j];
+            }
+        }
+    }
+    fflush(stdout);
+}
+
+int updateMap(char *filename) {
+    usleep(100);
     FILE *fp = fopen(filename, "r+");
     flock(fileno(fp), LOCK_EX);
-    flock(fileno(fp), LOCK_UN);
-    fclose(fp);
-    fp = fopen(filename, "r");
-    // flock(fileno(fp), LOCK_EX);
 
     int tmpX, tmpY;
     fscanf(fp, "%d %d\n", &tmpX, &tmpY);
 
-    if (tmpX > 10000 || tmpY > 10000)
-        return;
+    int numUpto = 0;
+    while (tmpX > 10000 || tmpY > 10000 || tmpX < 1 || tmpY < 1) {
+        flock(fileno(fp), LOCK_UN);
+        if (numUpto ++ > 10) return 0;
+        usleep(1000);
+        flock(fileno(fp), LOCK_EX);
+        fseek(fp, 0L, SEEK_SET);
+        fscanf(fp, "%d %d\n", &tmpX, &tmpY);
+    }
+
+    int modified = 0;
 
     if (tmpX != SIZEX || tmpY != SIZEY) {
         if (SIZEX != 0 && SIZEY != 0) {
+            for (int i = 0; i < SIZEY; i ++) free(Prevmap[i]);
+            free(Prevmap);
             for (int i = 0; i < SIZEY; i ++) free(map[i]);
             free(map);
             free(floors);
@@ -134,11 +165,14 @@ void updateMap(char *filename) {
         }
         SIZEX = tmpX;
         SIZEY = tmpY;
+        Prevmap = malloc(SIZEY * sizeof(uint8_t *));
+        for (int i = 0; i < SIZEY; i ++) Prevmap[i] = calloc(SIZEX, sizeof(uint8_t));
         map = malloc(SIZEY * sizeof(uint8_t *));
         for (int i = 0; i < SIZEY; i ++) map[i] = calloc(SIZEX, sizeof(uint8_t));
 
-        floors = calloc(SIZEX, sizeof(char));
-        buffer = calloc((SIZEX) * (SIZEY) * 25, sizeof(char));
+        floors = calloc(SIZEX + 1, sizeof(char));
+        buffer = calloc((SIZEX) * (SIZEY + 1) * 25, sizeof(char));
+        modified = 1;
     }
     int in, iter = 0;
     while ((in = fgetc(fp)) != EOF) {
@@ -159,6 +193,9 @@ void updateMap(char *filename) {
         } if (i >= SIZEY) break;
         switch(inp) {
         case ' ':
+            map[i][j ++] = 0;
+            break;
+        case '?':
             map[i][j ++] = 0;
             break;
         case '#':
@@ -205,9 +242,10 @@ void updateMap(char *filename) {
             break;
         }
     }
-
-    // flock(fileno(fp), LOCK_UN);
+    flock(fileno(fp), LOCK_UN);
     fclose(fp);
+
+    return modified;
 }
 
 int main(int argc, char *argv[]) {
@@ -223,16 +261,32 @@ int main(int argc, char *argv[]) {
     flock(fileno(fp), LOCK_UN);
     fclose(fp);
     
-    uint64_t prevHash = 0;
-    uint64_t currentHash;
+    // uint64_t prevHash = 0;
+    // uint64_t currentHash;
+        // currentHash = hashFile(file);
+
+        // if (currentHash != prevHash) {
+            // prevHash = currentHash;
+
+    struct stat attr;
+    stat(argv[1], &attr);
+
+    long lastModified = attr.st_mtimespec.tv_nsec;
+    long modified;
+    updateMap(argv[1]);
+    printmaze();
     
     while (1) {
-        currentHash = hashFile(file);
-
-        if (currentHash != prevHash) {
-            updateMap(file);
-            printmaze();
-            prevHash = currentHash;
+        // hashFile(argv[1], currentHash);
+        stat(argv[1], &attr);
+        modified = attr.st_mtimespec.tv_nsec;
+        if (lastModified != modified) {//memcmp(currentHash, prevHash, CC_SHA256_DIGEST_LENGTH) != 0) {
+            if (updateMap(argv[1]))
+                printmaze();
+            else
+                printmazediff();
+            lastModified = modified;
+            // memcpy(prevHash, currentHash, CC_SHA256_DIGEST_LENGTH);
         }
         
         usleep(100); // 100 microseconds sleep
