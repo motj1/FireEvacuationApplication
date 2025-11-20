@@ -219,30 +219,45 @@ def astar(map, src, dims):
 
     return Position3D(-1, -1, -1)
 
-def bfsPredictive(m, curr, dims):
+def getPredictiveMaps(m, dims, depth, pessimism):
   m_orig = copy.deepcopy(m)
-  spreadFire(m_orig, dims, 3)
-  m_plus1 = copy.deepcopy(m_orig)
-  spreadFire(m_orig, dims, 3)
-  m_plus2 = copy.deepcopy(m_orig)
-  spreadFire(m_orig, dims, 3)
-  m_plus3 = copy.deepcopy(m_orig)
+  depth_maps = []
+  
+  for i in range(depth):
+    spreadFire(m_orig, dims, pessimism)
+    depth_maps.insert(0, copy.deepcopy(m_orig))
+  
+  # m_plus1 = copy.deepcopy(m_orig)
+  # spreadFire(m_orig, dims, 2)
+  # m_plus2 = copy.deepcopy(m_orig)
+  # spreadFire(m_orig, dims, 2)
+  # m_plus3 = copy.deepcopy(m_orig)
 
-  # print("check 1")
-  instruction = bfs3D(m_plus3, curr, dims)
-  if instruction.row != -1:
-     return instruction
+  # return m_plus1, m_plus2, m_plus3
+  return depth_maps
+
+# def bfsPredictive(m, m_plus1, m_plus2, m_plus3, curr, dims):
+def bfsPredictive(m, depth_maps, curr, dims):
+  for i in range(len(depth_maps)):
+    instruction = bfs3D(depth_maps[i], curr, dims)
+    if instruction.row != -1 or i == len(depth_maps) - 1:
+       return instruction
+
   
-  # print("check 2")
-  instruction = bfs3D(m_plus2, curr, dims)
-  if instruction.row != -1:
-     return instruction
   
-  # print("check 3")
-  instruction = bfs3D(m_plus1, curr, dims)
-  if instruction.row != -1:
-     return instruction
+  # if instruction.row != -1:
+  #    return instruction
   
-  # print("check 4")
-  instruction = bfs3D(m, curr, dims)
-  return instruction
+  # # print("check 2")
+  # instruction = bfs3D(m_plus2, curr, dims)
+  # if instruction.row != -1:
+  #    return instruction
+  
+  # # print("check 3")
+  # instruction = bfs3D(m_plus1, curr, dims)
+  # if instruction.row != -1:
+  #    return instruction
+  
+  # # print("check 4")
+  # instruction = bfs3D(m, curr, dims)
+  # return instruction

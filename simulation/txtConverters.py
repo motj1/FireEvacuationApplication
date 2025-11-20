@@ -159,3 +159,71 @@ def readFileForNumbers(f, n):
   firstLine = [next(f) for _ in range(n)]
   text = "".join(firstLine)
   return [int(n) for n in re.findall(r'-?\d+', text)]
+
+def printWaitGraph(m, wg, dims, f):
+  for j in range(dims[f][0]):
+    for k in range(dims[f][1]):
+      if m[f][j][k].kind == 'wall':
+        print('#',end='')
+      elif wg[f][j][k] == 0:
+        print(' ',end='')
+      else:
+        print(wg[f][j][k], end='')
+    print('')
+
+def generateFileWithWaits(m, wg, dims):
+  maximumHeight = -1
+  
+  for i in range(len(dims)):
+    if dims[i][0] > maximumHeight:
+      maximumHeight = dims[i][0]
+
+  # sleep(0.01)
+  # with open("map.txt", "r") as f:
+  #   fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+  #   sleep(0.05)
+  #   fcntl.flock(f, fcntl.LOCK_UN)
+  sleep(0.20)
+  with open("map.txt", "w") as f:
+    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+
+    totalx = 0
+    maxy = 0
+    for i in range(len(dims)):
+      totalx += dims[i][1] + 5
+      if (dims[i][0] >= maxy): 
+        maxy = dims[i][0] + 1
+    f.write(f"{totalx} {maxy}\n")
+
+    for j in range(len(dims)):
+      for k in range(dims[j][1]):
+        if k == 0:
+          f.write("F")
+        elif k == 1:
+          f.write(f"{j}")
+        else:
+          f.write(" ")
+      f.write("     ")
+    f.write("\n")
+
+    for i in range(maximumHeight):
+      for j in range(len(dims)):
+        if i >= dims[j][0]:
+          for k in range(dims[j][1]):
+            f.write(" ")
+          f.write("     ")
+          continue
+        for k in range(dims[j][1]):
+          if m[j][i][k].kind != "fire" and  m[j][i][k].kind != "door" and  m[j][i][k].kind != "frdr" and  m[j][i][k].kind != "void":
+            f.write(parseChar(m[j][i][k].kind))
+          elif (wg[j][i][k] != 0):
+            f.write(str(wg[j][i][k]))
+          else:
+            f.write(' ')
+        f.write("     ")
+      f.write("\n")
+
+    fcntl.flock(f, fcntl.LOCK_UN)
+  # waitForResponse()
+
+  return "map.txt"
