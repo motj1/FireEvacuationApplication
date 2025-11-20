@@ -46,7 +46,6 @@ int SIZEX = 0, SIZEY = 0;
 
 char *floors;
 uint8_t **map;
-uint8_t **Prevmap;
 
 #define numColours 10
 const uint8_t colours[numColours] = { EMPTY_COLOR, WALL_COLOR, PERSON_COLOR, FIRE_COLOR, EXIT_COLOR, PATH_COLOR, OBJECT_COLOR, STAIR_COLOR, DOOR_COLOR, FIRE_DOOR_COLOR };
@@ -87,7 +86,6 @@ void printmaze() {
     index += sprintf(buffer, "%s\n", floors);
     for (int i=0; i < SIZEY; i++) {
         for (int j=0; j < SIZEX; j++) {
-            Prevmap[i][j] = map[i][j];
             if (map[i][j] < numColours) index += sprintf(buffer + index, "\033[48;5;%dm%s\033[0m", colours[map[i][j]], "  ");
             else {
                 if (map[i][j] < 14 + numColours)
@@ -102,27 +100,7 @@ void printmaze() {
     printf("\033c%s\n", buffer);
 }
 
-void printmazediff() {
-    for (int i=0; i < SIZEY; i++) {
-        for (int j=0; j < SIZEX; j++) {
-            if (map[i][j] != Prevmap[i][j]) {
-                // printf("Diff ad %d %d\n", i, j);
-                // ESC[{line};{column}H    move to line column
-                printf("\033[%d;%dH", i + 2, j*2);
-                if (map[i][j] < numColours) printf("\033[48;5;%dm%s\033[0m", colours[map[i][j]], "  ");
-                else {
-                    if (map[i][j] < 14 + numColours)
-                        printf("\033[48;5;%dm%s\033[0m", SMOKE_COLOR(map[i][j] - numColours), "  ");
-                    else 
-                        printf("\033[48;5;%dm%s\033[0m", PATH_COLOR, "  ");
-                }
-                Prevmap[i][j] = map[i][j];
-            }
-        }
-    }
-}
-
-int updateMap(char *filename) {
+void updateMap(char *filename) {
     FILE *fp = fopen(filename, "r+");
     flock(fileno(fp), LOCK_EX);
     flock(fileno(fp), LOCK_UN);
@@ -134,13 +112,10 @@ int updateMap(char *filename) {
     fscanf(fp, "%d %d\n", &tmpX, &tmpY);
 
     if (tmpX > 10000 || tmpY > 10000)
-        return 0;
+        return;
 
-    int modified = 0;
     if (tmpX != SIZEX || tmpY != SIZEY) {
         if (SIZEX != 0 && SIZEY != 0) {
-            for (int i = 0; i < SIZEY; i ++) free(Prevmap[i]);
-            free(Prevmap);
             for (int i = 0; i < SIZEY; i ++) free(map[i]);
             free(map);
             free(floors);
@@ -151,14 +126,8 @@ int updateMap(char *filename) {
         map = malloc(SIZEY * sizeof(uint8_t *));
         for (int i = 0; i < SIZEY; i ++) map[i] = calloc(SIZEX, sizeof(uint8_t));
 
-        // printf("Malloc\n");
-        Prevmap = malloc(SIZEY * sizeof(uint8_t *));
-        for (int i = 0; i < SIZEY; i ++) Prevmap[i] = calloc(SIZEX, sizeof(uint8_t));
-        // printf("Malloc done\n");
-
         floors = calloc(SIZEX, sizeof(char));
         buffer = calloc((SIZEX) * (SIZEY) * 25, sizeof(char));
-        modified = 1;
     }
     int in, iter = 0;
     while ((in = fgetc(fp)) != EOF) {
@@ -225,7 +194,6 @@ int updateMap(char *filename) {
 
     // flock(fileno(fp), LOCK_UN);
     fclose(fp);
-    return modified;
 }
 
 int main(int argc, char *argv[]) {
@@ -240,29 +208,17 @@ int main(int argc, char *argv[]) {
     flock(fileno(fp), LOCK_UN);
     fclose(fp);
     
-    // unsigned char prevHash[CC_SHA256_DIGEST_LENGTH];
-    // unsigned char currentHash[CC_SHA256_DIGEST_LENGTH];
-    // memset(prevHash, 0, CC_SHA256_DIGEST_LENGTH);
-
-    struct stat attr;
-    stat(argv[1], &attr);
-
-    long lastModified = attr.st_mtimespec.tv_nsec;
-    long modified;
-    updateMap(argv[1]);
-    printmaze();
+    unsigned char prevHash[CC_SHA256_DIGEST_LENGTH];
+    unsigned char currentHash[CC_SHA256_DIGEST_LENGTH];
+    memset(prevHash, 0, CC_SHA256_DIGEST_LENGTH);
     
     while (1) {
-        // hashFile(argv[1], currentHash);
-        stat(argv[1], &attr);
-        modified = attr.st_mtimespec.tv_nsec;
-        if (lastModified != modified) {//memcmp(currentHash, prevHash, CC_SHA256_DIGEST_LENGTH) != 0) {
-            if (updateMap(argv[1]))
-                printmaze();
-            else
-                printmazediff();
-            lastModified = modified;
-            // memcpy(prevHash, currentHash, CC_SHA256_DIGEST_LENGTH);
+        hashFile(argv[1], currentHash);
+        
+        if (memcmp(currentHash, prevHash, CC_SHA256_DIGEST_LENGTH) != 0) {
+            updateMap(argv[1]);
+            printmaze();
+            memcpy(prevHash, currentHash, CC_SHA256_DIGEST_LENGTH);
         }
         
         usleep(100); // 100 microseconds sleep
