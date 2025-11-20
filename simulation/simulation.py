@@ -16,7 +16,7 @@ else:
 if (not printPython):
   waitForResponse()
 
-  time.sleep(2)
+  time.sleep(1)
 m, dims, a = generateMultiStoryMapStairs(sys.argv[1])
 
 printMultiStoryMap(m, dims, printPython)
