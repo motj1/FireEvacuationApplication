@@ -38,5 +38,7 @@ def parseKind(c):
     return "exit"
   elif c == 'S':
     return "strs"
+  elif c == 'D':
+    return "door"
   else:  
     return "err"
