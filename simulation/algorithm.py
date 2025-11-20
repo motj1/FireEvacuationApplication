@@ -143,8 +143,6 @@ def calculate_dests(map, dims):
         cell_details[k][i][j].parent_j = j
 
         heapq.heappush(open_list, (0.0, k, i, j))
-    
-    found_dest = False
 
     while len(open_list) > 0:
         p = heapq.heappop(open_list)
@@ -183,7 +181,9 @@ def calculate_dests(map, dims):
                 if dir in diagonals:
                     g_new += 0.4
                 if (map[k][i][j].hasAgent):
-                    g_new += 0.2
+                    g_new += 0.1
+                if (map[k][i][j].kind[0:-1] == "smoke"):
+                    g_new += 1 * int(map[k][i][j].kind[-1])
 
                 if cell_details[k][new_i][new_j].g == float('inf') or cell_details[k][new_i][new_j].g > g_new:
                     # Add the cell to the open list
