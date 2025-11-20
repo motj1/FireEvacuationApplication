@@ -81,6 +81,7 @@ while 1:
           adjacentTile = m[a[i].floor][a[i].row + coords[0]][a[i].col + coords[1]]
           if adjacentTile.isTraversable():
             traversableCoords.append(Position3D(a[i].floor, a[i].row + coords[0], a[i].col + coords[1]))
+
         if len(traversableCoords) != 0:
           randCoord = traversableCoords[random.randint(1, len(traversableCoords))-1]
           nextInstruction = Position3D(a[i].floor, randCoord.row, randCoord.col)
