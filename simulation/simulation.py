@@ -4,7 +4,6 @@ from Position import *
 from txtConverters import *
 from Agent import *
 from txtConverters import *
-import random
 from tabulate import tabulate
 import time
 from fire import *
@@ -29,7 +28,7 @@ while 1:
   time.sleep(0.1)
   nextInstructions = []
 
-  spreadFire(m, dims, 8)
+  spreadFire(m, dims, 1)
 
   for i in range(len(a)):
     if finished[i] == True:
