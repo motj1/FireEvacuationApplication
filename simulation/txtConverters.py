@@ -105,7 +105,7 @@ def parseChar(kind):
 
 def printMultiStoryMap(m, dims):
   generateMultiStoryFile(m, dims)
-  # print(open("map.txt").read())
+  print(open("map.txt").read())
 
 def generateMultiStoryMapStairs(filename):
   f = open(filename)
