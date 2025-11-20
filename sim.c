@@ -34,10 +34,11 @@ ESC[2k                  Erase entire line
 #define SMOKE_COLOR(smoke_index) (255 - (((smoke_index) < 13)? (smoke_index) : 13))
 #define PERSON_COLOR 136 
 #define FIRE_COLOR 9
-#define EXIT_COLOR 5
+#define EXIT_COLOR 34
 #define PATH_COLOR 1
 #define OBJECT_COLOR 19
 #define STAIR_COLOR 129
+#define DOOR_COLOR 239
 // 229
 
 int SIZEX = 0, SIZEY = 0;
@@ -45,8 +46,8 @@ int SIZEX = 0, SIZEY = 0;
 char *floors;
 uint8_t **map;
 
-#define numColours 8
-const uint8_t colours[numColours] = { EMPTY_COLOR, WALL_COLOR, PERSON_COLOR, FIRE_COLOR, EXIT_COLOR, PATH_COLOR, OBJECT_COLOR, STAIR_COLOR };
+#define numColours 9
+const uint8_t colours[numColours] = { EMPTY_COLOR, WALL_COLOR, PERSON_COLOR, FIRE_COLOR, EXIT_COLOR, PATH_COLOR, OBJECT_COLOR, STAIR_COLOR, DOOR_COLOR };
 // Can add symbols array if needed
 
 char *buffer;
@@ -168,6 +169,9 @@ void updateMap(char *filename) {
             break;
         case 'S':
             map[i][j ++] = 7;
+            break;
+        case 'D':
+            map[i][j ++] = 8;
             break;
         case '\n':
             i ++;

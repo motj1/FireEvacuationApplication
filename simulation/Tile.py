@@ -13,7 +13,7 @@ class Tile:
       return True
     
   def isBurnable(self):
-    if self.kind in ["void", "obst", "strs"]:
+    if self.kind in ["void", "obst", "strs", "door"]:
       return True
     else:
       return False
