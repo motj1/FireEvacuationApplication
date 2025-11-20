@@ -10,18 +10,16 @@ from tabulate import tabulate
 import time
 from fire import *
 
-if (len(sys.argv) > 2):
-  printPython = 0
-else:
-  printPython = 1
+algos = ["bfs", "bfsPred", "astar", "nextMove"]
+algo = sys.argv[1]
 
-if (not printPython):
-  waitForResponse()
+if algo not in algos:
+  print("Please choose a valid algorithm")
+  exit()
 
-  time.sleep(2)
-m, dims, a = generateMultiStoryMapStairs(sys.argv[1])
-
-printMultiStoryMap(m, dims, printPython)
+# time.sleep(1)
+m, dims, a = generateMultiStoryMapStairs(sys.argv[2])
+printMultiStoryMap(m, dims, True)
 
 waitGraph = []
 for i in range(len(dims)):
@@ -37,21 +35,32 @@ tick = 0
 trapped = 0
 finished = [False for _ in range(len(a))]
 
+time.sleep(2)
+
 while 1:
   time.sleep(0.1)
   nextInstructions = []
 
-  spreadFire(m, dims, 0.1)
+  spreadFire(m, dims, 0.2)
   spreadSmoke(m, dims)
 
-  cell_details = calculate_dests(m, dims)
-  # depth_maps = getPredictiveMaps(m, dims, 3, 2)
+  if algo == "nextMove":
+    cell_details = calculate_dests(m, dims)
+  elif algo == "bfsPred":
+    depth_maps = getPredictiveMaps(m, dims, 3, 2)
 
   for i in range(len(a)):
     if finished[i] == True:
       nextInstructions.append(Position3D(-1, -1, -1))
       continue
-    nextInstruction = nextmove(a[i], cell_details) #bfsPredictive(m, depth_maps, a[i], dims) bfs3D(m, a[i], dims) astar(m, a[i], dims)   
+    if algo == "bfs":
+      nextInstruction = bfs3D(m, a[i], dims)
+    elif algo == "bfsPred":
+      nextInstruction = bfsPredictive(m, depth_maps, a[i], dims)
+    elif algo == "astar":
+      nextInstruction = astar(m, a[i], dims) 
+    elif algo == "nextMove":
+      nextInstruction = nextmove(a[i], cell_details)
 
     if nextInstruction.floor == -1:
       trapped += 1
@@ -77,7 +86,7 @@ while 1:
       m[agent.floor][agent.row][agent.col].hasAgent = False
       finished[a.index(agent)] = True
 
-  printMultiStoryMap(m, dims, printPython)
+  printMultiStoryMap(m, dims, True)
 
   numAgentsFinished = 0
   for i in range(len(finished)):
@@ -91,6 +100,7 @@ while 1:
 
 printWaitGraph(m, waitGraph, dims, 0)
 generateFileWithWaits(m, waitGraph, dims)
+print(f"Total Wait Value = {getTotalWait(waitGraph, dims)}")
 
 data = [
     ["Evacuated", len(a) - trapped],

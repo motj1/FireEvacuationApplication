@@ -181,10 +181,11 @@ def calculate_dests(map, dims):
                 if dir in diagonals:
                     g_new += 0.4
                 if (map[k][i][j].hasAgent):
-                    g_new += 0.1
+                    g_new += 5
                 if (map[k][i][j].kind[0:-1] == "smoke"):
                     g_new += 1 * int(map[k][i][j].kind[-1])
-
+                # if (map[k][i][j].kind == "fire"):
+                #     g_new += 1000
                 if cell_details[k][new_i][new_j].g == float('inf') or cell_details[k][new_i][new_j].g > g_new:
                     # Add the cell to the open list
                     heapq.heappush(open_list, (g_new, k, new_i, new_j))
@@ -315,14 +316,7 @@ def getPredictiveMaps(m, dims, depth, pessimism):
   for i in range(depth):
     spreadFire(m_orig, dims, pessimism)
     depth_maps.insert(0, copy.deepcopy(m_orig))
-  
-  # m_plus1 = copy.deepcopy(m_orig)
-  # spreadFire(m_orig, dims, 2)
-  # m_plus2 = copy.deepcopy(m_orig)
-  # spreadFire(m_orig, dims, 2)
-  # m_plus3 = copy.deepcopy(m_orig)
 
-  # return m_plus1, m_plus2, m_plus3
   return depth_maps
 
 # def bfsPredictive(m, m_plus1, m_plus2, m_plus3, curr, dims):
@@ -331,22 +325,3 @@ def bfsPredictive(m, depth_maps, curr, dims):
     instruction = bfs3D(depth_maps[i], curr, dims)
     if instruction.row != -1 or i == len(depth_maps) - 1:
        return instruction
-
-  
-  
-  # if instruction.row != -1:
-  #    return instruction
-  
-  # # print("check 2")
-  # instruction = bfs3D(m_plus2, curr, dims)
-  # if instruction.row != -1:
-  #    return instruction
-  
-  # # print("check 3")
-  # instruction = bfs3D(m_plus1, curr, dims)
-  # if instruction.row != -1:
-  #    return instruction
-  
-  # # print("check 4")
-  # instruction = bfs3D(m, curr, dims)
-  # return instruction

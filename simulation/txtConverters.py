@@ -219,7 +219,7 @@ def generateFileWithWaits(m, wg, dims):
           f.write("     ")
           continue
         for k in range(dims[j][1]):
-          if m[j][i][k].kind != "fire" and  m[j][i][k].kind != "door" and  m[j][i][k].kind != "frdr" and  m[j][i][k].kind != "void":
+          if m[j][i][k].kind == "wall" or m[j][i][k].kind == "exit":
             f.write(parseChar(m[j][i][k].kind))
           elif (wg[j][i][k] != 0):
             f.write(str(wg[j][i][k]))
@@ -232,3 +232,11 @@ def generateFileWithWaits(m, wg, dims):
   # waitForResponse()
 
   return "map.txt"
+
+def getTotalWait(wg, dims):
+  total = 0
+  for i in range(len(dims)):
+    for j in range(dims[i][0]):
+      for k in range(dims[i][1]):
+        total += wg[i][j][k]
+  return total
