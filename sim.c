@@ -6,7 +6,6 @@
 #include <string.h>
 #include <sys/file.h>
 #include <sys/stat.h>
-#include <CommonCrypto/CommonDigest.h>
 
 /*
 Ansi escape codes:
@@ -53,31 +52,43 @@ const uint8_t colours[numColours] = { EMPTY_COLOR, WALL_COLOR, PERSON_COLOR, FIR
 
 char *buffer;
 
-// SHA256 hash function for file contents
-void hashFile(char *filename, unsigned char *hash_out) {
+// Custom hash function for file contents
+// This uses a combination of FNV-1a and polynomial rolling hash
+uint64_t hashFile(char *filename) {
     FILE *fp = fopen(filename, "r");
-    if (!fp) {
-        memset(hash_out, 0, CC_SHA256_DIGEST_LENGTH);
-        return;
-    }
+    if (!fp) return 0;
     
     flock(fileno(fp), LOCK_SH);
     
-    // Get file size
-    fseek(fp, 0, SEEK_END);
-    long file_size = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
+    // FNV-1a constants
+    uint64_t hash = 14695981039346656037ULL; // FNV offset basis
+    const uint64_t fnv_prime = 1099511628211ULL;
     
-    // Read entire file
-    unsigned char *file_contents = malloc(file_size);
-    fread(file_contents, 1, file_size, fp);
+    // Additional polynomial hash for mixing
+    uint64_t poly_hash = 0;
+    const uint64_t poly_prime = 31;
     
-    // Hash it all at once
-    CC_SHA256(file_contents, (CC_LONG)file_size, hash_out);
+    int c;
+    uint64_t position = 1;
     
-    free(file_contents);
+    while ((c = fgetc(fp)) != EOF) {
+        // FNV-1a hash
+        hash ^= (uint64_t)c;
+        hash *= fnv_prime;
+        
+        // Polynomial hash with position weight
+        poly_hash = poly_hash * poly_prime + c * position;
+        position++;
+    }
+    
+    // Combine both hashes with XOR and rotation for better distribution
+    hash ^= poly_hash;
+    hash ^= (poly_hash >> 32);
+    
     flock(fileno(fp), LOCK_UN);
     fclose(fp);
+    
+    return hash;
 }
 
 void printmaze() {
@@ -151,10 +162,16 @@ void updateMap(char *filename) {
             map[i][j ++] = 0;
             break;
         case '#':
+<<<<<<< HEAD
             map[i][j ++] = 1;
             break;
         case '|':
+=======
+>>>>>>> 6581b4347c2005dcfd5454c5c418b943e5bc0fc6
             map[i][j ++] = 1;
+            break;
+        case '|':
+            map[i][j ++] = 1; // Jack's changes to add internal walls
             break;
         case 'P':
             map[i][j ++] = 2;
@@ -202,7 +219,8 @@ void updateMap(char *filename) {
 int main(int argc, char *argv[]) {
     if (argc < 2) return 1;
 
-    FILE *fp = fopen(argv[1], "r");
+    char *file = argv[1];
+    FILE *fp = fopen(file, "r");
 
     flock(fileno(fp), LOCK_EX);
 
@@ -211,17 +229,16 @@ int main(int argc, char *argv[]) {
     flock(fileno(fp), LOCK_UN);
     fclose(fp);
     
-    unsigned char prevHash[CC_SHA256_DIGEST_LENGTH];
-    unsigned char currentHash[CC_SHA256_DIGEST_LENGTH];
-    memset(prevHash, 0, CC_SHA256_DIGEST_LENGTH);
+    uint64_t prevHash = 0;
+    uint64_t currentHash;
     
     while (1) {
-        hashFile(argv[1], currentHash);
-        
-        if (memcmp(currentHash, prevHash, CC_SHA256_DIGEST_LENGTH) != 0) {
-            updateMap(argv[1]);
+        currentHash = hashFile(file);
+
+        if (currentHash != prevHash) {
+            updateMap(file);
             printmaze();
-            memcpy(prevHash, currentHash, CC_SHA256_DIGEST_LENGTH);
+            prevHash = currentHash;
         }
         
         usleep(100); // 100 microseconds sleep
