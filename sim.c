@@ -162,12 +162,6 @@ void updateMap(char *filename) {
             map[i][j ++] = 0;
             break;
         case '#':
-<<<<<<< HEAD
-            map[i][j ++] = 1;
-            break;
-        case '|':
-=======
->>>>>>> 6581b4347c2005dcfd5454c5c418b943e5bc0fc6
             map[i][j ++] = 1;
             break;
         case '|':
