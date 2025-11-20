@@ -2,10 +2,6 @@
 """
 Fire Evacuation Simulation Visualizer
 Python version of sim.c
-
-This program reads a map file and visualizes a fire evacuation simulation
-using ANSI color codes in the terminal. It continuously monitors the file
-for changes and updates the display accordingly.
 """
 
 import sys
@@ -233,7 +229,6 @@ def main():
     
     prev_hash = 0
     
-    # Main loop - monitor file for changes
     while True:
         try:
             current_hash = hash_file(filename)
