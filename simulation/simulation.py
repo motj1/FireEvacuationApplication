@@ -8,17 +8,17 @@ from tabulate import tabulate
 import time
 from fire import *
 
-# waitForResponse()
+waitForResponse()
 
-# time.sleep(0.5)
+time.sleep(0.5)
 m, dims, a = generateMultiStoryMapStairs(sys.argv[1])
 printMultiStoryMap(m, dims)
 
 # Generate the instruction sets for each agent using the algorithm being tested
-agentInstructions = []
+# agentInstructions = []
 
-for i in range(len(a)):
-  agentInstructions.append(astar(m, a[i], dims))# bfs3D(m, a[i], dims))
+# for i in range(len(a)):
+#   agentInstructions.append(astar(m, a[i], dims))# bfs3D(m, a[i], dims))
 
 tick = 0
 trapped = 0
@@ -29,12 +29,14 @@ while 1:
   nextInstructions = []
 
   spreadFire(m, dims, 1)
+  
+  cell_details = calculate_dests(m, dims)
 
   for i in range(len(a)):
     if finished[i] == True:
       nextInstructions.append(Position3D(-1, -1, -1))
       continue
-    nextInstruction = bfsPredictive(m, a[i], dims) # astar(m, a[i], dims) bfs3D(m, a[i], dims)  
+    nextInstruction = nextmove(a[i], cell_details) # bfsPredictive(m, a[i], dims) # astar(m, a[i], dims) bfs3D(m, a[i], dims)  
 
     if nextInstruction.floor == -1:
       trapped += 1

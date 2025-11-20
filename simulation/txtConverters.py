@@ -16,7 +16,7 @@ def generateMultiStoryFile(m, dims):
   #   fcntl.flock(f.fileno(), fcntl.LOCK_EX)
   #   sleep(0.05)
   #   fcntl.flock(f, fcntl.LOCK_UN)
-  sleep(0.20)
+  sleep(0.1)
   with open("map.txt", "w") as f:
     fcntl.flock(f.fileno(), fcntl.LOCK_EX)
 
@@ -107,7 +107,7 @@ def parseChar(kind):
 
 def printMultiStoryMap(m, dims):
   generateMultiStoryFile(m, dims)
-  print(open("map.txt").read())
+  # print(open("map.txt").read())
 
 def generateMultiStoryMapStairs(filename):
   f = open(filename)

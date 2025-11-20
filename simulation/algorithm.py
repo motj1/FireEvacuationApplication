@@ -71,7 +71,7 @@ def generateInstructionsBFS3D(prev, floor, newRow, newCol):
     col = prev[prevFloor][prevRow][col].col
   return instructions[0]
 
-class Cell:
+class BaseCell:
     def __init__(self):
         # Parent cell's row index
         self.parent_i = -1
@@ -79,10 +79,13 @@ class Cell:
         self.parent_j = -1
         # Parent cell's floor index
         self.parent_k = -1
-        # Total cost of the cell (g + h)
-        self.f = float('inf')
         # Cost from start to this cell
         self.g = float('inf')
+
+class Cell(BaseCell):
+    def __init__(self):
+        # Total cost of the cell (g + h)
+        self.f = float('inf')
         # Heuristic cost from this cell to destination
         self.h = 0
 
@@ -114,20 +117,103 @@ def generatePathAStar3D(cell_details, dest):
         return Position3D(-1, -1, -1)
     return instructions[-1]
 
+def calculate_dests(map, dims):
+    exits = []
+
+    cell_details = [[[BaseCell() for _ in range(dims[i][1])] for _ in range(dims[i][0])] for i in range(len(dims))]
+
+    for floor in range(len(dims)):
+        for i in range(dims[floor][0]):
+            for j in range(dims[floor][1]):
+                if (map[floor][i][j].kind == "exit"):
+                    exits.append(Position3D(floor, i, j))
+    
+    q = []
+    closed_list = [[[False for _ in range(dims[i][1])] for _ in range(dims[i][0])] for i in range(len(dims))]
+    adjacencyCoords = [[0, 1], [1, 0], [0, -1], [-1, 0], [-1, -1], [1, 1], [-1, 1], [1, -1]]
+    diagonals = [[-1, -1], [1, 1], [-1, 1], [1, -1]]
+
+    open_list = []
+    for exit in exits:
+        i = exit.row
+        j = exit.col
+        k = exit.floor
+        cell_details[k][i][j].g = 0
+        cell_details[k][i][j].parent_k = k
+        cell_details[k][i][j].parent_i = i
+        cell_details[k][i][j].parent_j = j
+
+        heapq.heappush(open_list, (0.0, k, i, j))
+    
+    found_dest = False
+
+    while len(open_list) > 0:
+        p = heapq.heappop(open_list)
+
+        k = p[1]
+        i = p[2]
+        j = p[3]
+        
+        closed_list[k][i][j] = True
+
+        # Handle stairwell
+        if type(map[k][i][j]) is Stairwell:
+            for upOrDown in range(2):
+                new_k = map[k][i][j].down.floor if upOrDown else map[k][i][j].up.floor # can make going up but cant be bothered for now (would be the same as with other directions)
+                new_i = map[k][i][j].down.row if upOrDown else map[k][i][j].up.row
+                new_j = map[k][i][j].down.col if upOrDown else map[k][i][j].up.col
+                if is_valid(new_k, new_i, new_j, dims) and map[new_k][new_i][new_j].isTraversable() and not closed_list[new_k][new_i][new_j]:
+                    # Calculate the new f, g, and h values
+                    g_new = cell_details[k][i][j].g + 1.0 # Can multiply for stair weighting
+
+                    if cell_details[new_k][new_i][new_j].g == float('inf') or cell_details[new_k][new_i][new_j].g > g_new:
+                        # Add the cell to the open list
+                        heapq.heappush(open_list, (g_new, new_k, new_i, new_j))
+                        # Update the cell details
+                        cell_details[new_k][new_i][new_j].g = g_new
+                        cell_details[new_k][new_i][new_j].parent_k = k
+                        cell_details[new_k][new_i][new_j].parent_i = i
+                        cell_details[new_k][new_i][new_j].parent_j = j
+
+        for dir in adjacencyCoords:
+            new_i = i + dir[0]
+            new_j = j + dir[1]
+            if is_valid(k, new_i, new_j, dims) and map[k][new_i][new_j].isTraversable() and not closed_list[k][new_i][new_j]:
+                # Calculate the new f, g, and h values
+                g_new = cell_details[k][i][j].g + 1.0
+                if dir in diagonals:
+                    g_new += 0.4
+                if (map[k][i][j].hasAgent):
+                    g_new += 0.2
+
+                if cell_details[k][new_i][new_j].g == float('inf') or cell_details[k][new_i][new_j].g > g_new:
+                    # Add the cell to the open list
+                    heapq.heappush(open_list, (g_new, k, new_i, new_j))
+                    # Update the cell details
+                    cell_details[k][new_i][new_j].g = g_new
+                    cell_details[k][new_i][new_j].parent_k = k
+                    cell_details[k][new_i][new_j].parent_i = i
+                    cell_details[k][new_i][new_j].parent_j = j
+    return cell_details
+
+def nextmove(src, cell_details):
+    return Position3D(cell_details[src.floor][src.row][src.col].parent_k, cell_details[src.floor][src.row][src.col].parent_i, cell_details[src.floor][src.row][src.col].parent_j)
+
 def astar(map, src, dims):
     if map[src.floor][src.row][src.col].kind == "fire":
         return Position3D(-1, -1, -1)
 
+    found_exit = False
     dests = []
-    foundExit = False
 
-    for i in range(dims[src.floor][0]):
-        for j in range(dims[src.floor][1]):
-            if (type(map[src.floor][i][j]) is Stairwell and not foundExit) or ((map[src.floor][i][j]).kind == "exit" and foundExit):
-                dests.append(Position3D(src.floor, i, j))
-            elif ((map[src.floor][i][j]).kind == "exit"):
-                dests = [Position3D(src.floor, i, j)]
-                foundExit = True
+    for i in range(dims[floor][0]):
+        for j in range(dims[floor][1]):
+            if ((map[floor][i][j]).kind == "exit" and not found_exit):
+                dests = []
+                found_exit = True
+            if (type(map[floor][i][j]) is Stairwell and not found_exit) or ((map[floor][i][j]).kind == "exit"):
+                dests.append(Position3D(floor, i, j))
+            
 
     closed_list = [[[False for _ in range(dims[i][1])] for _ in range(dims[i][0])] for i in range(len(dims))]
     cell_details = [[[Cell() for _ in range(dims[i][1])] for _ in range(dims[i][0])] for i in range(len(dims))]
@@ -160,8 +246,8 @@ def astar(map, src, dims):
         closed_list[k][i][j] = True
 
         # Handle stairwell
-        for upOrDown in range(2):
-            if type(map[k][i][j]) is Stairwell:
+        if type(map[k][i][j]) is Stairwell:
+            for upOrDown in range(2):
                 new_k = map[k][i][j].down.floor if upOrDown else map[k][i][j].up.floor # can make going up but cant be bothered for now (would be the same as with other directions)
                 new_i = map[k][i][j].down.row if upOrDown else map[k][i][j].up.row
                 new_j = map[k][i][j].down.col if upOrDown else map[k][i][j].up.col
@@ -201,9 +287,13 @@ def astar(map, src, dims):
                     return generatePathAStar3D(cell_details, Position3D(k, new_i, new_j))# gen path
                 else:
                     # Calculate the new f, g, and h values
-                    g_new = cell_details[k][i][j].g + 1.0 if dir not in diagonals else (2 ** 0.5)
+                    g_new = cell_details[k][i][j].g + 1.0
+                    if dir in diagonals:
+                        g_new += 0.4
+                    
+                    # Avoid ppl and other things like smoke
                     h_new = calculate_h_value(Position3D(k, new_i, new_j), dests)
-                    f_new = g_new + h_new
+                    f_new = g_new + h_new * 2
 
                     if cell_details[k][new_i][new_j].f == float('inf') or cell_details[k][new_i][new_j].f > f_new:
                         # Add the cell to the open list
