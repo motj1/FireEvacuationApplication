@@ -117,15 +117,23 @@ void updateMap(char *filename) {
     flock(fileno(fp), LOCK_UN);
     fclose(fp);
     fp = fopen(filename, "r");
-    // flock(fileno(fp), LOCK_EX);
+    flock(fileno(fp), LOCK_EX);
 
     int tmpX, tmpY;
     fscanf(fp, "%d %d\n", &tmpX, &tmpY);
+    // if (1) {
+    //     // printf("Here %d != %d and %d != %d\n", tmpX, SIZEX, tmpY, SIZEY);
+    //     // sleep(1);
+    // }
 
     if (tmpX > 10000 || tmpY > 10000)
         return;
 
-    if (tmpX != SIZEX || tmpY != SIZEY) {
+    if (tmpX != SIZEX || tmpY != SIZEY || floors == NULL) {
+        if (floors == NULL) {
+            printf("AHHH %d != %d and %d != %d\n", tmpX, SIZEX, tmpY, SIZEY);
+            // sleep(2);
+        }
         if (SIZEX != 0 && SIZEY != 0) {
             for (int i = 0; i < SIZEY; i ++) free(map[i]);
             free(map);
@@ -135,11 +143,45 @@ void updateMap(char *filename) {
         SIZEX = tmpX;
         SIZEY = tmpY;
         map = malloc(SIZEY * sizeof(uint8_t *));
-        for (int i = 0; i < SIZEY; i ++) map[i] = calloc(SIZEX, sizeof(uint8_t));
+        if (map == NULL) {
+            printf("There was a big error in map SIZEX = %d and SIZEY = %d\n", SIZEX, SIZEY);
+            perror("Error in calloc map");
 
-        floors = calloc(SIZEX, sizeof(char));
+            sleep(10);
+        }
+        for (int i = 0; i < SIZEY; i ++) {
+            map[i] = calloc(SIZEX, sizeof(uint8_t));
+            if (map[i] == NULL) {
+                printf("There was a big error in map[%d] SIZEX = %d and SIZEY = %d\n", i, SIZEX, SIZEY);
+                perror("Error in calloc map[i]");
+    
+                sleep(10);
+            }
+        }
+
+        floors = calloc(SIZEX*2 + 1, sizeof(char));
+        if (floors == NULL) {
+            printf("There was a big error\n");
+            perror("Error in calloc floors");
+
+            sleep(10);
+        }
         buffer = calloc((SIZEX) * (SIZEY) * 25, sizeof(char));
+        if (buffer == NULL) {
+            printf("There was a big error\n");
+            perror("Error in calloc buffer");
+
+            sleep(10);
+        }
     }
+
+    if (floors == NULL || buffer == NULL || map == NULL) {
+        printf("There was a big error\n");
+        perror("Error in calloc buffer");
+
+        sleep(10);
+    }
+    
     int in, iter = 0;
     while ((in = fgetc(fp)) != EOF) {
         if (iter >= SIZEX - 1 || (in == '\n' && iter != 0)) break;
@@ -206,7 +248,7 @@ void updateMap(char *filename) {
         }
     }
 
-    // flock(fileno(fp), LOCK_UN);
+    flock(fileno(fp), LOCK_UN);
     fclose(fp);
 }
 
