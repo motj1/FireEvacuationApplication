@@ -21,8 +21,8 @@ if algo not in algos:
   print("Please choose a valid algorithm")
   exit()
 
+# time.sleep(1)
 m, dims, a = generateMultiStoryMapStairs(sys.argv[2])
-
 printMultiStoryMap(m, dims, True)
 
 waitGraph = []
@@ -45,7 +45,7 @@ while 1:
   time.sleep(0.1)
   nextInstructions = []
 
-  spreadFire(m, dims, 0.1)
+  spreadFire(m, dims, 0.2)
   spreadSmoke(m, dims)
 
   if algo == "nextMove":

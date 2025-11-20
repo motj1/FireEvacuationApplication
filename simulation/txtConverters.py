@@ -93,7 +93,12 @@ def parseChar(kind):
   elif kind[0:5] == "smoke":
     # we subtract 1 since range goes from smoke1-smoke5 
     # but we want colours to range from 0-4
-    return str(int(kind[5])-1) 
+    if kind[5].isdigit():
+      return str(int(kind[5])-1) 
+    else:
+      intMap = {9: "9", 10:"A", 11:"B", 12:"C", 13:"D"}
+      charMap = {"A":10, "B":11, "C":12, "D":13}
+      return intMap[charMap[kind[5]]-1]
   elif kind == 'obst':
     return 'O'
   elif kind == "exit":
@@ -221,7 +226,7 @@ def generateFileWithWaits(m, wg, dims):
           f.write("     ")
           continue
         for k in range(dims[j][1]):
-          if m[j][i][k].kind != "fire" and  m[j][i][k].kind != "door" and  m[j][i][k].kind != "frdr" and  m[j][i][k].kind != "void":
+          if m[j][i][k].kind == "wall" or m[j][i][k].kind == "exit":
             f.write(parseChar(m[j][i][k].kind))
           elif (wg[j][i][k] != 0):
             f.write(str(wg[j][i][k]))

@@ -174,6 +174,7 @@ int updateMap(char *filename) {
         buffer = calloc((SIZEX) * (SIZEY + 1) * 25, sizeof(char));
         modified = 1;
     }
+    
     int in, iter = 0;
     while ((in = fgetc(fp)) != EOF) {
         if (iter >= SIZEX - 1 || (in == '\n' && iter != 0)) break;

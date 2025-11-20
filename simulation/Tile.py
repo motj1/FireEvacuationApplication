@@ -13,7 +13,7 @@ class Tile:
       return True
     
   def getBurnProbability(self):
-    if self.kind in ["void"] + [f"smoke{i}" for i in range(1,6)]:
+    if self.kind in ["void"] + [f"smoke{i}" for i in range(1,10)] + [f"smoke{c}" for c in ["A", "B", "C"]]:
       return 0.125
     elif self.kind in ["obst", "door"]:
       return 0.0625
@@ -48,7 +48,7 @@ def parseKind(c):
     return "door"
   elif c == 'D':
     return 'frdr'
-  elif c in ["i" for i in range(1,6)]:# or c in ['A', 'B', 'C']:
+  elif c in ["i" for i in range(1,10)] or c in ['A', 'B', 'C']:
     return "smoke" + c
   else:  
     return "err"
