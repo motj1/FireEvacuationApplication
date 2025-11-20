@@ -183,7 +183,7 @@ def calculate_dests(map, dims):
                 if (map[k][i][j].hasAgent):
                     g_new += 5
                 if (map[k][i][j].kind[0:-1] == "smoke"):
-                    g_new += 1 * int(map[k][i][j].kind[-1])
+                    g_new += 1 * (13 - int(map[k][i][j].kind[-1], 16))
                 # if (map[k][i][j].kind == "fire"):
                 #     g_new += 1000
                 if cell_details[k][new_i][new_j].g == float('inf') or cell_details[k][new_i][new_j].g > g_new:
