@@ -216,3 +216,7 @@ def astar(map, src, dims):
 
 
     return Position3D(-1, -1, -1)
+
+def bfsPredictive(map, curr, dims):
+
+  return
