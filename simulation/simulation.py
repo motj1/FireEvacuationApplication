@@ -58,6 +58,7 @@ tick = 0
 trapped = 0
 finished = [False for _ in range(len(a))]
 while 1:
+  time.sleep(0.1)
   nextInstructions = []
 
   spreadFire(m, dims)
@@ -66,7 +67,7 @@ while 1:
     if finished[i] == True:
       nextInstructions.append(Position3D(-1, -1, -1))
       continue
-    nextInstruction = astar(m, a[i], dims) #bfs3D(m, a[i], dims) #
+    nextInstruction = bfs3D(m, a[i], dims) # astar(m, a[i], dims) 
 
     if nextInstruction.floor == -1:
       trapped += 1

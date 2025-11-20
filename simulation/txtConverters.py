@@ -96,6 +96,10 @@ def parseChar(kind):
     return '+'
   elif kind == 'strs':
     return 'S'
+  elif kind == 'door':
+    return 'd'
+  elif kind == 'frdr':
+    return 'D'
   elif kind == "err":  
     return '?'
 

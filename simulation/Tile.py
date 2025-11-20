@@ -13,7 +13,7 @@ class Tile:
       return True
     
   def isBurnable(self):
-    if self.kind in ["void", "obst", "strs"]:
+    if self.kind in ["void", "obst", "strs", "door"]:
       return True
     else:
       return False
@@ -38,5 +38,9 @@ def parseKind(c):
     return "exit"
   elif c == 'S':
     return "strs"
+  elif c == 'd':
+    return "door"
+  elif c == 'D':
+    return 'frdr'
   else:  
     return "err"
