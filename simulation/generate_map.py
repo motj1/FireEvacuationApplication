@@ -52,11 +52,6 @@ def generate_map(seed, floors, width, height, output_file, num_people=None, num_
             # Write dimensions
             f.write(f"{height}\n{width}\n")
             
-            # Determine stairs for this floor
-            # A shaft exists on this floor if it connects to something?
-            # We assume shafts go from floor 0 to floor floors-1
-            # But for a specific floor, we only write mappings for S tiles present.
-            
             current_floor_stairs = []
             stair_mappings = []
             
@@ -76,17 +71,6 @@ def generate_map(seed, floors, width, height, output_file, num_people=None, num_
                 
                 # Add to mappings if it connects somewhere
                 if f_down != -1 or f_up != -1:
-                    # Format: (fDown rDown cDown) (fUp rUp cUp)
-                    # IMPORTANT: The txtConverters.py readFileForNumbers reads ONE line.
-                    # If we have multiple stairs, each mapping must be on its own line or
-                    # all mappings on one line if it reads multiple times?
-                    
-                    # The logic in txtConverters.py:
-                    # numStairs = readFileForNumbers(f, 1)  <-- Reads one line
-                    # for j in range(numStairs[0]):
-                    #    stairMappings.append(readFileForNumbers(f, 1)) <-- Reads ONE line PER mapping
-                    
-                    # So each stair mapping MUST be on a separate line.
                     
                     stair_mappings.append(f"{f_down} {r_down} {c_down} {f_up} {r_up} {c_up}")
                     current_floor_stairs.append((r, c))
@@ -318,10 +302,6 @@ def generate_map(seed, floors, width, height, output_file, num_people=None, num_
             for row in grid:
                 f.write("".join(row) + "\n")
                 
-            # Add newline separation if not last floor?
-            # The format seems to just concatenate.
-            # But usually there is a newline after the grid rows?
-            # readFileForNumbers handles it.
             f.write("\n")
 
     print(f"Map generated: {output_file}")
