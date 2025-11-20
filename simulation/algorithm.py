@@ -199,7 +199,7 @@ def astar(map, src, dims):
                     return generatePathAStar3D(cell_details, Position3D(k, new_i, new_j))# gen path
                 else:
                     # Calculate the new f, g, and h values
-                    g_new = cell_details[k][i][j].g + 1.0 # if dir in diagonals else 2 ** 0.5
+                    g_new = cell_details[k][i][j].g + 1.0 # if dir not in diagonals else 2 ** 0.5
                     h_new = calculate_h_value(Position3D(k, new_i, new_j), dests)
                     f_new = g_new + h_new
 

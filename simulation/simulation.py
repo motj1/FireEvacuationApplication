@@ -42,9 +42,9 @@ def spreadFire(m, dims):
 def spreadHappens():
   return random.randint(1, 8) <= 1
 
-# waitForResponse()
+waitForResponse()
 
-# time.sleep(0.5)
+time.sleep(0.5)
 m, dims, a = generateMultiStoryMapStairs(sys.argv[1])
 printMultiStoryMap(m, dims)
 
