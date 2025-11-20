@@ -1,7 +1,7 @@
 from Tile import *
 import random
 
-def spreadFire(m, dims):
+def spreadFire(m, dims, pessimism):
   tilesSpreadTo = []
 
   for i in range(len(dims)):
@@ -14,7 +14,7 @@ def spreadFire(m, dims):
             row = j + coord[0]
             col = k + coord[1]
 
-            probability = m[i][row][col].getBurnProbability()
+            probability = m[i][row][col].getBurnProbability() * pessimism
             if spreadHappens(probability):
               tilesSpreadTo.append(m[i][row][col])
 
@@ -22,13 +22,13 @@ def spreadFire(m, dims):
             if (m[i][j][k].down.row >= 0):
               d = m[i][j][k].down
               downCell = m[d.floor][d.row][d.col]
-              probability = downCell.getBurnProbability()
+              probability = downCell.getBurnProbability() * pessimism
               if spreadHappens(probability):
                 tilesSpreadTo.append(m[d.floor][d.row][d.col])
             if (m[i][j][k].up.row >= 0):
               u = m[i][j][k].up
               upCell = m[u.floor][u.row][u.col]
-              probability = upCell.getBurnProbability()
+              probability = upCell.getBurnProbability() * pessimism
               if spreadHappens(probability):
                 tilesSpreadTo.append(m[u.floor][u.row][u.col])
 

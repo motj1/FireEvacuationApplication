@@ -221,11 +221,11 @@ def astar(map, src, dims):
 
 def bfsPredictive(m, curr, dims):
   m_orig = copy.deepcopy(m)
-  spreadFire(m_orig, dims, 2)
+  spreadFire(m_orig, dims, 3)
   m_plus1 = copy.deepcopy(m_orig)
-  spreadFire(m_orig, dims, 2)
+  spreadFire(m_orig, dims, 3)
   m_plus2 = copy.deepcopy(m_orig)
-  spreadFire(m_orig, dims, 2)
+  spreadFire(m_orig, dims, 3)
   m_plus3 = copy.deepcopy(m_orig)
 
   # print("check 1")
