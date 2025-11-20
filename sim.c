@@ -161,8 +161,11 @@ void updateMap(char *filename) {
         case ' ':
             map[i][j ++] = 0;
             break;
-        case '#' || '|':
+        case '#':
             map[i][j ++] = 1;
+            break;
+        case '|':
+            map[i][j ++] = 1; // Jack's changes to add internal walls
             break;
         case 'P':
             map[i][j ++] = 2;
@@ -225,7 +228,7 @@ int main(int argc, char *argv[]) {
     
     while (1) {
         currentHash = hashFile(file);
-        
+
         if (currentHash != prevHash) {
             updateMap(file);
             printmaze();
