@@ -51,8 +51,13 @@ floors = ""
 
 
 def smoke_color(smoke_index):
-    """Calculate smoke color based on smoke intensity (0-12)"""
-    return 255 - (min(smoke_index, 13))
+    """Calculate smoke color based on smoke intensity (0-12), gray to light gray"""
+    # Use ANSI 256-color grayscale from 242 (gray) to 255 (very light gray)
+    # Good starting darkness with lighter end for better visibility gradient
+    index = min(smoke_index, 13)
+    gray = 243
+    light_gray = 255
+    return gray + int((light_gray - gray) * (index / 13))
 
 
 def hash_file(filename):
