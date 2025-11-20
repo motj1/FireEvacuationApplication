@@ -1,3 +1,11 @@
+from algorithm import *
+from Position import *
+from txtConverters import *
+from Agent import *
+from txtConverters import *
+import random
+from fire import *
+
 def spreadSmoke(m, dims):
   smokeSpreadTiles = []
 
@@ -60,4 +68,4 @@ def getGradientSmoke(sourceTile: Tile) -> str:
 
 def smokeSpreadHappens (sourceIntensity: int) -> bool:
   # smoke chance is proportional to intensity
-  return random.randint(1, (sourceIntensity+2)//3) <= 1
+  return random.randint(1, sourceIntensity+1) <= 1

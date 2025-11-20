@@ -41,7 +41,7 @@ while 1:
   time.sleep(0.1)
   nextInstructions = []
 
-  spreadFire(m, dims, 1)
+  spreadFire(m, dims, 0.1)
   spreadSmoke(m, dims)
 
   cell_details = calculate_dests(m, dims)
