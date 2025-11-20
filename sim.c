@@ -31,7 +31,7 @@ ESC[2k                  Erase entire line
 
 #define WALL_COLOR 0
 #define EMPTY_COLOR 231
-#define SMOKE_COLOR(smoke_index) (255 - (((smoke_index) < 13)? (smoke_index) : 13))
+#define SMOKE_COLOR(smoke_index) (242 + (((smoke_index) < 13) ? (smoke_index) : 13))
 #define PERSON_COLOR 136 
 #define FIRE_COLOR 9
 #define EXIT_COLOR 5
