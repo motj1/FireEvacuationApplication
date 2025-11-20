@@ -228,3 +228,11 @@ def generateFileWithWaits(m, wg, dims):
   # waitForResponse()
 
   return "map.txt"
+
+def getTotalWait(wg, dims):
+  total = 0
+  for i in range(len(dims)):
+    for j in range(dims[i][0]):
+      for k in range(dims[i][1]):
+        total += wg[i][j][k]
+  return total
