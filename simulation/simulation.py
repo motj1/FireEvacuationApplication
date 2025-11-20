@@ -18,7 +18,7 @@ if algo not in algos:
   exit()
 
 # time.sleep(1)
-m, dims, a = generateMultiStoryMapStairs(sys.argv[1])
+m, dims, a = generateMultiStoryMapStairs(sys.argv[2])
 printMultiStoryMap(m, dims, True)
 
 waitGraph = []
