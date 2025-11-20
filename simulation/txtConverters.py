@@ -82,6 +82,8 @@ def waitForResponse():
 def parseChar(kind):
   if kind == "wall":
     return '#'
+  elif kind == "internal_wall":
+    return '|'
   elif kind == "void":
     return ' '
   elif kind == "fire":
