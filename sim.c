@@ -39,6 +39,7 @@ ESC[2k                  Erase entire line
 #define OBJECT_COLOR 19
 #define STAIR_COLOR 129
 #define DOOR_COLOR 239
+#define FIRE_DOOR_COLOR 51
 // 229
 
 int SIZEX = 0, SIZEY = 0;
@@ -46,8 +47,8 @@ int SIZEX = 0, SIZEY = 0;
 char *floors;
 uint8_t **map;
 
-#define numColours 9
-const uint8_t colours[numColours] = { EMPTY_COLOR, WALL_COLOR, PERSON_COLOR, FIRE_COLOR, EXIT_COLOR, PATH_COLOR, OBJECT_COLOR, STAIR_COLOR, DOOR_COLOR };
+#define numColours 10
+const uint8_t colours[numColours] = { EMPTY_COLOR, WALL_COLOR, PERSON_COLOR, FIRE_COLOR, EXIT_COLOR, PATH_COLOR, OBJECT_COLOR, STAIR_COLOR, DOOR_COLOR, FIRE_DOOR_COLOR };
 // Can add symbols array if needed
 
 char *buffer;
@@ -170,8 +171,11 @@ void updateMap(char *filename) {
         case 'S':
             map[i][j ++] = 7;
             break;
-        case 'D':
+        case 'd':
             map[i][j ++] = 8;
+            break;
+        case 'D':
+            map[i][j ++] = 9;
             break;
         case '\n':
             i ++;
