@@ -10,6 +10,10 @@ from tabulate import tabulate
 import time
 from fire import *
 
+waitForResponse()
+
+sleep(0.5)
+
 algos = ["bfs", "bfsPred", "astar", "nextMove"]
 algo = sys.argv[1]
 
@@ -35,7 +39,7 @@ tick = 0
 trapped = 0
 finished = [False for _ in range(len(a))]
 
-time.sleep(2)
+# time.sleep(2)
 
 while 1:
   time.sleep(0.1)
