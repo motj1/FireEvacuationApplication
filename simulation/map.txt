@@ -1,34 +1,15 @@
-110 33
-F0                               F1              F2                                      F3                   
-############################     ###########     #####                                   ################     
-#S                         #     #    S    #     #S  ##                                  #              #     
-#                          #     #         #     #    ##                                 #              #     
-#                          #     #         #     #F F  ##                                #              #     
-#                          #     #         #     # F F F##                               #              #     
-#                          #     #         #     # FFFFF #                               #########      #     
-#                          #     ##### #####     #FFFFFFF#                               #              #     
-############ ###############     #         #     # FFFFFF#                               #              #     
-           # #                   #         #     #FFFFFFF#                               #              #     
-           # #                   #         #     #FFFFFFF#                               #          S   #     
-           # #                   #    S    #     #FFFFFFF####################            ################     
-           # #                   ###########     #FFFFFFFFFFF#FFFFFFFFFFFFFF##                                
-           #E#                                   #FFFFFFFFFFF#FFFFFFFFFFFFFFF##                               
-                                                 #FFFFFFFFFFF#FFFFFFFFFFFFFFFF##                              
-                                                 #FFFFFFFFFFFFFFFFFFFFFFFFFFFFF##                             
-                                                 #####FF########FFFFFFFFFFFFFFFF##                            
-                                                 # FFFFFFFFFFF #FFFFFFFFFFFFFFFFF##                           
-                                                 #FFFFFFFFFFFF #FFFFFFFFFFFFFFFFFF##                          
-                                                 #FFFFFFFFFFFFF#FFFFFFFFFFFFFFFFFFF#                          
-                                                 #FFFFFFFFF FF ##################FF#                          
-                                                 #FFFFFFFFFFF  #       FFFFFFFFFFFF#                          
-                                                 #FFFFFFFFF F  #        FFFFFFFFFFF#                          
-                                                 #  FFFFFF     #         FFFFFFFFFF#                          
-                                                 ########################FFFFFFFFFF#                          
-                                                                        #FF#########                          
-                                                                        #FFP       #                          
-                                                                        # FF F     #                          
-                                                                        #   F      #                          
-                                                                        #          #                          
-                                                                        #          #                          
-                                                                        #          #                          
-                                                                        ############                          
+33 14
+F0                               
+############################     
+#                          #     
+#                          #     
+#                          #     
+#                          #     
+#                          #     
+#                          #     
+##### ###### ###### ########     
+    # #    # #    # #            
+    # #    # #    # #            
+    # ###### ###### #            
+    #               #            
+    ########E########            
