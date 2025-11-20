@@ -11,9 +11,13 @@ from fire import *
 
 # waitForResponse()
 
-# time.sleep(0.5)
+time.sleep(2)
 m, dims, a = generateMultiStoryMapStairs(sys.argv[1])
 printMultiStoryMap(m, dims)
+
+waitGraph = []
+for i in range(len(dims)):
+  waitGraph.append([[0 for _ in range(dims[i][1])] for _ in range(dims[i][0])])
 
 # Generate the instruction sets for each agent using the algorithm being tested
 agentInstructions = []
@@ -30,12 +34,13 @@ while 1:
   nextInstructions = []
 
   spreadFire(m, dims, 8)
+  depth_maps = getPredictiveMaps(m, dims, 3, 2)
 
   for i in range(len(a)):
     if finished[i] == True:
       nextInstructions.append(Position3D(-1, -1, -1))
       continue
-    nextInstruction = bfsPredictive(m, a[i], dims) # astar(m, a[i], dims) bfs3D(m, a[i], dims)  
+    nextInstruction = bfsPredictive(m, depth_maps, a[i], dims) #bfs3D(m, a[i], dims) astar(m, a[i], dims)   
 
     if nextInstruction.floor == -1:
       trapped += 1
@@ -51,6 +56,9 @@ while 1:
     
     # Attempt to move the agent
     moved, a[i] = moveAgent3D(m, a[i], nextInstructions[i])
+
+    if moved == False and waitGraph[a[i].floor][a[i].row][a[i].col] < 9:
+      waitGraph[a[i].floor][a[i].row][a[i].col] += 1
 
   # Remove an agent that has reached an exit tile from that tile
   for agent in reversed(a):
@@ -69,6 +77,9 @@ while 1:
     break
 
   tick += 1
+
+printWaitGraph(m, waitGraph, dims, 0)
+generateFileWithWaits(m, waitGraph, dims)
 
 data = [
     ["Evacuated", len(a) - trapped],
