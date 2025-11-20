@@ -3,6 +3,8 @@ from Tile import *
 from txtConverters import *
 import math
 import heapq
+from fire import *
+import copy
 
 def bfs3D(m, curr, dims):
   if m[curr.floor][curr.row][curr.col].kind == "fire":
@@ -199,7 +201,7 @@ def astar(map, src, dims):
                     return generatePathAStar3D(cell_details, Position3D(k, new_i, new_j))# gen path
                 else:
                     # Calculate the new f, g, and h values
-                    g_new = cell_details[k][i][j].g + 1.0 # if dir in diagonals else 2 ** 0.5
+                    g_new = cell_details[k][i][j].g + 1.0 if dir not in diagonals else (2 ** 0.5)
                     h_new = calculate_h_value(Position3D(k, new_i, new_j), dests)
                     f_new = g_new + h_new
 
@@ -216,3 +218,31 @@ def astar(map, src, dims):
 
 
     return Position3D(-1, -1, -1)
+
+def bfsPredictive(m, curr, dims):
+  m_orig = copy.deepcopy(m)
+  spreadFire(m_orig, dims, 3)
+  m_plus1 = copy.deepcopy(m_orig)
+  spreadFire(m_orig, dims, 3)
+  m_plus2 = copy.deepcopy(m_orig)
+  spreadFire(m_orig, dims, 3)
+  m_plus3 = copy.deepcopy(m_orig)
+
+  # print("check 1")
+  instruction = bfs3D(m_plus3, curr, dims)
+  if instruction.row != -1:
+     return instruction
+  
+  # print("check 2")
+  instruction = bfs3D(m_plus2, curr, dims)
+  if instruction.row != -1:
+     return instruction
+  
+  # print("check 3")
+  instruction = bfs3D(m_plus1, curr, dims)
+  if instruction.row != -1:
+     return instruction
+  
+  # print("check 4")
+  instruction = bfs3D(m, curr, dims)
+  return instruction

@@ -4,43 +4,9 @@ from Position import *
 from txtConverters import *
 from Agent import *
 from txtConverters import *
-import random
 from tabulate import tabulate
 import time
-
-def spreadFire(m, dims):
-  tilesSpreadTo = []
-
-  for i in range(len(dims)):
-    for j in range(dims[i][0]):
-      for k in range(dims[i][1]):
-        if m[i][j][k].kind == "fire":
-          adjacencyCoords = [[0, 1], [1, 0], [0, -1], [-1, 0], [-1, -1], [1, 1], [-1, 1], [1, -1]]
-
-          for coord in adjacencyCoords:
-            row = j + coord[0]
-            col = k + coord[1]
-
-            if m[i][row][col].isBurnable() and spreadHappens():
-              tilesSpreadTo.append(m[i][row][col])
-
-          if type(m[i][j][k]) is Stairwell:
-            if (m[i][j][k].down.row >= 0):
-              d = m[i][j][k].down
-              downCell = m[d.floor][d.row][d.col]
-              if downCell.isBurnable() and spreadHappens():
-                tilesSpreadTo.append(m[d.floor][d.row][d.col])
-            if (m[i][j][k].up.row >= 0):
-              u = m[i][j][k].up
-              upCell = m[u.floor][u.row][u.col]
-              if upCell.isBurnable() and spreadHappens():
-                tilesSpreadTo.append(m[u.floor][u.row][u.col])
-
-  for tile in tilesSpreadTo:
-    tile.kind = "fire"
-
-def spreadHappens():
-  return random.randint(1, 8) <= 1
+from fire import *
 
 # waitForResponse()
 
@@ -57,16 +23,18 @@ for i in range(len(a)):
 tick = 0
 trapped = 0
 finished = [False for _ in range(len(a))]
+
 while 1:
+  time.sleep(0.1)
   nextInstructions = []
 
-  spreadFire(m, dims)
+  spreadFire(m, dims, 1)
 
   for i in range(len(a)):
     if finished[i] == True:
       nextInstructions.append(Position3D(-1, -1, -1))
       continue
-    nextInstruction = astar(m, a[i], dims) #bfs3D(m, a[i], dims) #
+    nextInstruction = bfsPredictive(m, a[i], dims) # astar(m, a[i], dims) bfs3D(m, a[i], dims)  
 
     if nextInstruction.floor == -1:
       trapped += 1

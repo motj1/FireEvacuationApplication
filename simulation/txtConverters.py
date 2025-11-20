@@ -11,12 +11,12 @@ def generateMultiStoryFile(m, dims):
     if dims[i][0] > maximumHeight:
       maximumHeight = dims[i][0]
 
-  sleep(0.01)
-  with open("map.txt", "r") as f:
-    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
-    sleep(0.5)
-    fcntl.flock(f, fcntl.LOCK_UN)
-  sleep(0.01)
+  # sleep(0.01)
+  # with open("map.txt", "r") as f:
+  #   fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+  #   sleep(0.05)
+  #   fcntl.flock(f, fcntl.LOCK_UN)
+  sleep(0.20)
   with open("map.txt", "w") as f:
     fcntl.flock(f.fileno(), fcntl.LOCK_EX)
 
@@ -57,7 +57,7 @@ def generateMultiStoryFile(m, dims):
       f.write("\n")
 
     fcntl.flock(f, fcntl.LOCK_UN)
-
+  # waitForResponse()
 
   return "map.txt"
 
@@ -82,6 +82,8 @@ def waitForResponse():
 def parseChar(kind):
   if kind == "wall":
     return '#'
+  elif kind == "internal_wall":
+    return '|'
   elif kind == "void":
     return ' '
   elif kind == "fire":
@@ -96,6 +98,10 @@ def parseChar(kind):
     return '+'
   elif kind == 'strs':
     return 'S'
+  elif kind == 'door':
+    return 'd'
+  elif kind == 'frdr':
+    return 'D'
   elif kind == "err":  
     return '?'
 

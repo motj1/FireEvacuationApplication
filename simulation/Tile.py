@@ -7,14 +7,18 @@ class Tile:
     self.hasAgent = hasAgent
 
   def isTraversable(self):
-    if self.kind == "wall" or self.kind == "fire" or self.kind == "obst":
+    if self.kind == "wall" or self.kind == "fire" or self.kind == "obst" or self.kind == "internal_wall":
       return False
     else:
       return True
     
-  def isBurnable(self):
-    if self.kind in ["void", "obst", "strs"]:
-      return True
+  def getBurnProbability(self):
+    if self.kind in ["void"]:
+      return 0.125
+    elif self.kind in ["obst", "door"]:
+      return 0.0625
+    elif self.kind in ["strs", "internal_wall"]:
+      return 0.03125
     else:
       return False
 
@@ -28,6 +32,8 @@ class Stairwell(Tile):
 def parseKind(c):
   if c == '#':
     return "wall"
+  elif c == '|':
+    return "internal_wall"
   elif c == ' ':
     return "void"
   elif c == 'F':
@@ -38,5 +44,9 @@ def parseKind(c):
     return "exit"
   elif c == 'S':
     return "strs"
+  elif c == 'd':
+    return "door"
+  elif c == 'D':
+    return 'frdr'
   else:  
     return "err"
