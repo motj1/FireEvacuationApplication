@@ -88,6 +88,10 @@ def parseChar(kind):
     return ' '
   elif kind == "fire":
     return 'F'
+  elif kind[0:5] == "smoke":
+    # we subtract 1 since range goes from smoke1-smoke5 
+    # but we want colours to range from 0-4
+    return str(int(kind[5])-1) 
   elif kind == 'obst':
     return 'O'
   elif kind == "exit":
@@ -228,3 +232,11 @@ def generateFileWithWaits(m, wg, dims):
   # waitForResponse()
 
   return "map.txt"
+
+def getTotalWait(wg, dims):
+  total = 0
+  for i in range(len(dims)):
+    for j in range(dims[i][0]):
+      for k in range(dims[i][1]):
+        total += wg[i][j][k]
+  return total
