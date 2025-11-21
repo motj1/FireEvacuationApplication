@@ -29,7 +29,7 @@ TEST_CONFIGS = [
     {"name": "XLarge", "floors": 2, "width": 50, "height": 50, "people": 20, "fire": 3},
 ]
 
-ALGORITHMS = ["bfs", "bfsPred", "astar", "nextMove"]
+ALGORITHMS = ["bfs", "bfsPred", "bfsPredPess", "astar", "nextMove"]
 
 def run_simulation(map_file, algo):
     """
@@ -72,6 +72,8 @@ def run_simulation(map_file, algo):
                 cell_details = calculate_dests(m, dims)
             elif algo == "bfsPred":
                 depth_maps = getPredictiveMaps(m, dims, 3, 2)
+            elif algo == "bfsPredPess":
+                depth_maps = getPredictiveMaps(m, dims, 3, 5)
             
             # Calculate next move for each agent
             for i in range(len(a)):
@@ -84,10 +86,32 @@ def run_simulation(map_file, algo):
                         nextInstruction = bfs3D(m, a[i], dims)
                     elif algo == "bfsPred":
                         nextInstruction = bfsPredictive(m, depth_maps, a[i], dims)
+                    elif algo == "bfsPredPess":
+                        nextInstruction = bfsPredictive(m, depth_maps, a[i], dims)
                     elif algo == "astar":
                         nextInstruction = astar(m, a[i], dims)
                     elif algo == "nextMove":
                         nextInstruction = nextmove(a[i], cell_details)
+
+                    curTile = m[a[i].floor][a[i].row][a[i].col]
+                    charMap = {"A":10, "B":11, "C":12, "D":13}
+                    adjacencyCoords = [[0, 1], [1, 0], [0, -1], [-1, 0], [-1, -1], [1, 1], [-1, 1], [1, -1]]
+
+                    if curTile.kind[0:5] == "smoke":
+                        curTileInty = int(curTile.kind[5]) if curTile.kind[5].isdigit() else charMap[curTile.kind[5]]
+
+                        if random.randint(1, (curTileInty+2)//2) <= 1:
+                            traversableCoords = []
+                            for coords in adjacencyCoords:
+                                adjacentTile = m[a[i].floor][a[i].row + coords[0]][a[i].col + coords[1]]
+                                if adjacentTile.isTraversable():
+                                    traversableCoords.append(Position3D(a[i].floor, a[i].row + coords[0], a[i].col + coords[1]))
+
+                            if len(traversableCoords) != 0:
+                                randCoord = traversableCoords[random.randint(1, len(traversableCoords))-1]
+                                nextInstruction = Position3D(a[i].floor, randCoord.row, randCoord.col)
+                            else:
+                                nextInstruction = Position3D(-1, -1, -1)
                     
                     if nextInstruction.floor == -1:
                         trapped += 1
@@ -154,84 +178,84 @@ def run_simulation(map_file, algo):
         }
 
 def run_tests(num_trials=5):
-    """
-    Run comprehensive tests across all configurations and algorithms
-    """
     results = []
-    
+
     print("=" * 80)
     print("EVACUATION ALGORITHM PERFORMANCE TESTING")
     print("=" * 80)
     print()
-    
-    # Create test maps directory
+
     maps_dir = Path("test_maps")
     maps_dir.mkdir(exist_ok=True)
-    
+
     test_num = 0
     total_tests = len(TEST_CONFIGS) * len(ALGORITHMS) * num_trials
-    
+
     for config in TEST_CONFIGS:
         print(f"\n{'=' * 80}")
         print(f"Testing Configuration: {config['name']}")
         print(f"  Floors: {config['floors']}, Size: {config['width']}x{config['height']}")
         print(f"  People: {config['people']}, Fire Spots: {config['fire']}")
         print(f"{'=' * 80}\n")
-        
+
+        # ----------------------------------------------------
+        # GENERATE ONE STABLE MAP PER CONFIGURATION
+        # ----------------------------------------------------
+        seed = hash(f"{config['name']}_fixed_seed") % (2**31)
+        map_file = maps_dir / f"{config['name']}.txt"
+
+        if not map_file.exists():
+            generate_map(
+                seed=seed,
+                floors=config['floors'],
+                width=config['width'],
+                height=config['height'],
+                output_file=str(map_file),
+                num_people=config['people'],
+                num_fire_spots=config['fire']
+            )
+
+        # ----------------------------------------------------
+        # RUN ALL ALGORITHMS ON SAME MAP FOR num_trials TRIALS
+        # ----------------------------------------------------
         for algo in ALGORITHMS:
-            print(f"  Testing {algo.upper()} algorithm...")
-            
-            algo_results = []
-            
+            results_for_algo = []
+
             for trial in range(num_trials):
+
                 test_num += 1
-                print(f"    Trial {trial + 1}/{num_trials} (Test {test_num}/{total_tests})...", end=" ")
-                
-                # Generate unique map for this trial
-                seed = hash(f"{config['name']}{algo}{trial}") % (2**31)
-                map_file = maps_dir / f"{config['name']}_{algo}_trial{trial}.txt"
-                
-                generate_map(
-                    seed=seed,
-                    floors=config['floors'],
-                    width=config['width'],
-                    height=config['height'],
-                    output_file=str(map_file),
-                    num_people=config['people'],
-                    num_fire_spots=config['fire']
-                )
-                
-                # Run simulation
+                print(f"  {algo.upper()} - Trial {trial + 1}/{num_trials} "
+                      f"(Test {test_num}/{total_tests})...", end=" ")
+
                 stats = run_simulation(str(map_file), algo)
-                algo_results.append(stats)
-                
-                # Clean up map file
-                map_file.unlink()
-                
-                print(f"✓ (Survived: {stats['evacuated']}/{stats['total']}, Ticks: {stats['ticks']})")
-            
-            # Calculate average statistics
+                results_for_algo.append(stats)
+
+                print(f"✓ (Survived: {stats['evacuated']}/{stats['total']}, "
+                      f"Ticks: {stats['ticks']})")
+
+            # ------------------------------------------------
+            # AVERAGE RESULTS FOR THIS ALGO + CONFIG
+            # ------------------------------------------------
             avg_stats = {
                 "config": config['name'],
                 "algorithm": algo,
-                "avg_survival_rate": sum(r['survival_rate'] for r in algo_results) / num_trials,
-                "avg_evacuated": sum(r['evacuated'] for r in algo_results) / num_trials,
-                "avg_trapped": sum(r['trapped'] for r in algo_results) / num_trials,
-                "avg_ticks": sum(r['ticks'] for r in algo_results) / num_trials,
-                "avg_total_wait": sum(r['total_wait'] for r in algo_results) / num_trials,
-                "avg_avg_wait": sum(r['avg_wait'] for r in algo_results) / num_trials,
+                "avg_survival_rate": sum(r['survival_rate'] for r in results_for_algo) / num_trials,
+                "avg_evacuated": sum(r['evacuated'] for r in results_for_algo) / num_trials,
+                "avg_trapped": sum(r['trapped'] for r in results_for_algo) / num_trials,
+                "avg_ticks": sum(r['ticks'] for r in results_for_algo) / num_trials,
+                "avg_total_wait": sum(r['total_wait'] for r in results_for_algo) / num_trials,
+                "avg_avg_wait": sum(r['avg_wait'] for r in results_for_algo) / num_trials,
                 "trials": num_trials,
-                "errors": sum(1 for r in algo_results if r['error'] is not None)
+                "errors": sum(1 for r in results_for_algo if r['error'] is not None)
             }
-            
+
             results.append(avg_stats)
-    
-    # Clean up test maps directory
-    try:
-        maps_dir.rmdir()
-    except:
-        pass
-    
+
+        # ----------------------------------------------------
+        # DELETE MAP AFTER ALL ALGOS & TRIALS COMPLETE
+        # ----------------------------------------------------
+        map_file.unlink()
+
     return results
 
 def print_results(results):

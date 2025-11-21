@@ -14,11 +14,11 @@ class Tile:
     
   def getBurnProbability(self):
     if self.kind in ["void"] + [f"smoke{i}" for i in range(1,10)] + [f"smoke{c}" for c in ["A", "B", "C"]]:
-      return 0.125
+      return 0.15
     elif self.kind in ["obst", "door"]:
-      return 0.0625
+      return 0.1
     elif self.kind in ["strs", "internal_wall"]:
-      return 0.03125
+      return 0.05
     else:
       return False
 
