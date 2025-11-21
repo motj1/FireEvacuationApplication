@@ -131,6 +131,7 @@ void printmazediff() {
             }
         }
     }
+    printf("\033[%d;%dH", 0, 0);
     fflush(stdout);
 }
 
