@@ -37,7 +37,7 @@ ESC[2k                  Erase entire line
 #define PATH_COLOR 1
 #define OBJECT_COLOR 19
 #define STAIR_COLOR 129
-#define DOOR_COLOR 239
+#define DOOR_COLOR 228
 #define FIRE_DOOR_COLOR 51
 // 229
 

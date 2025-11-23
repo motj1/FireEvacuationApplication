@@ -11,7 +11,7 @@ def generateMultiStoryFile(m, dims):
     if dims[i][0] > maximumHeight:
       maximumHeight = dims[i][0]
 
-  sleep(0.1)
+  sleep(0.05)
   with open("map.txt", "r") as f:
     fcntl.flock(f.fileno(), fcntl.LOCK_EX)
     fcntl.flock(f, fcntl.LOCK_UN)
@@ -55,11 +55,11 @@ def generateMultiStoryFile(m, dims):
       f.write("\n")
 
     fcntl.flock(f, fcntl.LOCK_UN)
-  sleep(0.05)
-  with open("map.txt", "r") as f:
-    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
-    sleep(0.2)
-    fcntl.flock(f, fcntl.LOCK_UN)
+  # sleep(0.05)
+  # with open("map.txt", "r") as f:
+  #   fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+  #   sleep(0.2)
+  #   fcntl.flock(f, fcntl.LOCK_UN)
 
   return "map.txt"
 
@@ -226,10 +226,10 @@ def generateFileWithWaits(m, wg, dims):
           f.write("     ")
           continue
         for k in range(dims[j][1]):
-          if m[j][i][k].kind == "wall" or m[j][i][k].kind == "exit":
+          if m[j][i][k].kind == "wall" or m[j][i][k].kind == "exit" or m[j][i][k].kind == "internal_wall":
             f.write(parseChar(m[j][i][k].kind))
           elif (wg[j][i][k] != 0):
-            f.write(str(wg[j][i][k]))
+            f.write(str(10 - wg[j][i][k]))
           else:
             f.write(' ')
         f.write("     ")

@@ -39,8 +39,6 @@ tick = 0
 trapped = 0
 finished = [False for _ in range(len(a))]
 
-# time.sleep(2)
-
 while 1:
   time.sleep(0.1)
   nextInstructions = []
