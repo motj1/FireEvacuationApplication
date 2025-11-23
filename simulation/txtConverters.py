@@ -173,17 +173,6 @@ def readFileForNumbers(f, n):
   text = "".join(firstLine)
   return [int(n) for n in re.findall(r'-?\d+', text)]
 
-def printWaitGraph(m, wg, dims, f):
-  for j in range(dims[f][0]):
-    for k in range(dims[f][1]):
-      if m[f][j][k].kind == 'wall':
-        print('#',end='')
-      elif wg[f][j][k] == 0:
-        print(' ',end='')
-      else:
-        print(wg[f][j][k], end='')
-    print('')
-
 def generateFileWithWaits(m, wg, dims):
   maximumHeight = -1
   

@@ -123,7 +123,6 @@ while 1:
 
   tick += 1
 
-printWaitGraph(m, waitGraph, dims, 0)
 generateFileWithWaits(m, waitGraph, dims)
 print(f"Total Wait Value = {getTotalWait(waitGraph, dims)}")
 
