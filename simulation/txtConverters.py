@@ -12,6 +12,7 @@ def generateMultiStoryFile(m, dims):
       maximumHeight = dims[i][0]
 
   sleep(0.05)
+  sleep(0.05)
   with open("map.txt", "r") as f:
     fcntl.flock(f.fileno(), fcntl.LOCK_EX)
     fcntl.flock(f, fcntl.LOCK_UN)

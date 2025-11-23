@@ -10,7 +10,7 @@ from tabulate import tabulate
 import time
 from fire import *
 
-waitForResponse()
+#waitForResponse()
 
 sleep(0.5)
 
@@ -63,6 +63,29 @@ while 1:
       nextInstruction = astar(m, a[i], dims) 
     elif algo == "nextMove":
       nextInstruction = nextmove(a[i], cell_details)
+
+    # chaotic movement under smoke
+    #---------------------------------------------------
+    curTile = m[a[i].floor][a[i].row][a[i].col]
+    charMap = {"A":10, "B":11, "C":12, "D":13}
+    adjacencyCoords = [[0, 1], [1, 0], [0, -1], [-1, 0], [-1, -1], [1, 1], [-1, 1], [1, -1]]
+
+    if curTile.kind[0:5] == "smoke":
+      curTileInty = int(curTile.kind[5]) if curTile.kind[5].isdigit() else charMap[curTile.kind[5]]
+
+      if random.randint(1, (curTileInty+2)//2) <= 1:
+        traversableCoords = []
+        for coords in adjacencyCoords:
+          adjacentTile = m[a[i].floor][a[i].row + coords[0]][a[i].col + coords[1]]
+          if adjacentTile.isTraversable():
+            traversableCoords.append(Position3D(a[i].floor, a[i].row + coords[0], a[i].col + coords[1]))
+
+        if len(traversableCoords) != 0:
+          randCoord = traversableCoords[random.randint(1, len(traversableCoords))-1]
+          nextInstruction = Position3D(a[i].floor, randCoord.row, randCoord.col)
+        else:
+          nextInstruction = Position3D(-1, -1, -1)
+    #---------------------------------------------------
 
     if nextInstruction.floor == -1:
       trapped += 1

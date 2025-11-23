@@ -73,14 +73,14 @@ def canSmokeSpread (sourceTile: Tile, destTile: Tile) -> bool:
   if sourceTile.kind == "fire":
     return True
   elif sourceTile.kind[0:5] == "smoke":
-    intMap = {9: "9", 10:"A", 11:"B", 12:"C", 13:"D"}
-    sourceInty = (sourceTile.kind[5].isdigit()) if sourceTile.kind[5] else intMap[sourceTile.kind[5]]
+    charMap = {"A":10, "B":11, "C":12, "D":13}
+    sourceInty = int(sourceTile.kind[5]) if sourceTile.kind[5].isdigit() else charMap[sourceTile.kind[5]]
 
     if not smokeSpreadHappens(sourceInty):
       return False
     
     if destTile.kind[0:5] == "smoke":
-      destInty = (destTile.kind[5].isdigit()) if destTile.kind[5] else intMap[destTile.kind[5]]
+      destInty = int(destTile.kind[5]) if destTile.kind[5].isdigit() else charMap[destTile.kind[5]]
       return sourceInty > destInty
     else:
       return True
