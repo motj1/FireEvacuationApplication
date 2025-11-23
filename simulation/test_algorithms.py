@@ -10,6 +10,7 @@ import json
 import time
 from pathlib import Path
 from tabulate import tabulate
+import multiprocessing
 
 # Import required modules (avoiding simulation.py's main execution)
 from generate_map import generate_map
@@ -177,19 +178,15 @@ def run_simulation(map_file, algo):
             "error": str(e)
         }
 
-def run_tests(num_trials=5):
+def run_single_trial(args):
+    """Wrapper for running a single trial in parallel"""
+    map_file, algo = args
+    return run_simulation(str(map_file), algo)
+
+def run_tests(num_trials):
     results = []
-
-    print("=" * 80)
-    print("EVACUATION ALGORITHM PERFORMANCE TESTING")
-    print("=" * 80)
-    print()
-
     maps_dir = Path("test_maps")
     maps_dir.mkdir(exist_ok=True)
-
-    test_num = 0
-    total_tests = len(TEST_CONFIGS) * len(ALGORITHMS) * num_trials
 
     for config in TEST_CONFIGS:
         print(f"\n{'=' * 80}")
@@ -198,65 +195,115 @@ def run_tests(num_trials=5):
         print(f"  People: {config['people']}, Fire Spots: {config['fire']}")
         print(f"{'=' * 80}\n")
 
-        # ----------------------------------------------------
-        # GENERATE ONE STABLE MAP PER CONFIGURATION
-        # ----------------------------------------------------
-        seed = hash(f"{config['name']}_fixed_seed") % (2**31)
-        map_file = maps_dir / f"{config['name']}.txt"
+        # Generate maps
+        map_files = []
+        for map_id in range(3):
+            seed = hash(f"{config['name']}_seed_{map_id}") % (2**31)
+            map_file = maps_dir / f"{config['name']}_{map_id}.txt"
+            if not map_file.exists():
+                generate_map(
+                    seed=seed,
+                    floors=config['floors'],
+                    width=config['width'],
+                    height=config['height'],
+                    output_file=str(map_file),
+                    num_people=config['people'],
+                    num_fire_spots=config['fire']
+                )
+            map_files.append(map_file)
 
-        if not map_file.exists():
-            generate_map(
-                seed=seed,
-                floors=config['floors'],
-                width=config['width'],
-                height=config['height'],
-                output_file=str(map_file),
-                num_people=config['people'],
-                num_fire_spots=config['fire']
-            )
+        # ----------------------------------------------------
+        # Prepare all trial tasks for multiprocessing
+        # ----------------------------------------------------
+        tasks = []
+        for algo in ALGORITHMS:
+            for map_file in map_files:
+                for _ in range(num_trials):
+                    tasks.append((map_file, algo))
 
         # ----------------------------------------------------
-        # RUN ALL ALGORITHMS ON SAME MAP FOR num_trials TRIALS
+        # Run all tasks in parallel
+        # ----------------------------------------------------
+        with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
+            all_results = pool.map(run_single_trial, tasks)
+
+        # ----------------------------------------------------
+        # Combine results per algorithm (average across maps & trials)
         # ----------------------------------------------------
         for algo in ALGORITHMS:
-            results_for_algo = []
+            combined_results = [r for (t, r) in zip(tasks, all_results) if t[1] == algo]
+            total_runs = len(combined_results)
 
-            for trial in range(num_trials):
-
-                test_num += 1
-                print(f"  {algo.upper()} - Trial {trial + 1}/{num_trials} "
-                      f"(Test {test_num}/{total_tests})...", end=" ")
-
-                stats = run_simulation(str(map_file), algo)
-                results_for_algo.append(stats)
-
-                print(f"✓ (Survived: {stats['evacuated']}/{stats['total']}, "
-                      f"Ticks: {stats['ticks']})")
-
-            # ------------------------------------------------
-            # AVERAGE RESULTS FOR THIS ALGO + CONFIG
-            # ------------------------------------------------
             avg_stats = {
                 "config": config['name'],
                 "algorithm": algo,
-                "avg_survival_rate": sum(r['survival_rate'] for r in results_for_algo) / num_trials,
-                "avg_evacuated": sum(r['evacuated'] for r in results_for_algo) / num_trials,
-                "avg_trapped": sum(r['trapped'] for r in results_for_algo) / num_trials,
-                "avg_ticks": sum(r['ticks'] for r in results_for_algo) / num_trials,
-                "avg_total_wait": sum(r['total_wait'] for r in results_for_algo) / num_trials,
-                "avg_avg_wait": sum(r['avg_wait'] for r in results_for_algo) / num_trials,
-                "trials": num_trials,
-                "errors": sum(1 for r in results_for_algo if r['error'] is not None)
+                "avg_survival_rate": sum(r['survival_rate'] for r in combined_results) / total_runs,
+                "avg_evacuated": sum(r['evacuated'] for r in combined_results) / total_runs,
+                "avg_trapped": sum(r['trapped'] for r in combined_results) / total_runs,
+                "avg_ticks": sum(r['ticks'] for r in combined_results) / total_runs,
+                "avg_total_wait": sum(r['total_wait'] for r in combined_results) / total_runs,
+                "avg_avg_wait": sum(r['avg_wait'] for r in combined_results) / total_runs,
+                "trials": total_runs,
+                "errors": sum(1 for r in combined_results if r['error'] is not None)
             }
 
             results.append(avg_stats)
 
-        # ----------------------------------------------------
-        # DELETE MAP AFTER ALL ALGOS & TRIALS COMPLETE
-        # ----------------------------------------------------
-        map_file.unlink()
+        # Clean up maps
+        for map_file in map_files:
+            map_file.unlink()
 
     return results
+
+def run_tests_on_directory(num_trials, maps_dir="test_cases"):
+    results = []
+    maps_dir = Path(maps_dir)
+    if not maps_dir.exists():
+        raise FileNotFoundError(f"Directory {maps_dir} does not exist")
+
+    # Collect all map files
+    map_files = sorted(maps_dir.glob("*.txt"))
+    if not map_files:
+        raise FileNotFoundError(f"No .txt map files found in {maps_dir}")
+
+    all_results = []
+
+    for map_file in map_files:
+        config_name = map_file.stem  # Use full filename as config name
+        print(f"\n=== Running tests on map: {map_file.name} ===")
+        for algo in ALGORITHMS:
+            for trial in range(num_trials):
+                print(f"Running trial {trial + 1}/{num_trials} with algorithm {algo}...")
+                stats = run_simulation(str(map_file), algo)
+                stats["config"] = config_name
+                stats["algorithm"] = algo
+                all_results.append(stats)
+
+    # Combine results per file & algorithm
+    grouped_results = {}
+    for r in all_results:
+        key = (r["config"], r["algorithm"])
+        grouped_results.setdefault(key, []).append(r)
+
+    for (config, algo), results_list in grouped_results.items():
+        total_runs = len(results_list)
+        avg_stats = {
+            "config": config,
+            "algorithm": algo,
+            "avg_survival_rate": sum(r['survival_rate'] for r in results_list) / total_runs,
+            "avg_evacuated": sum(r['evacuated'] for r in results_list) / total_runs,
+            "avg_trapped": sum(r['trapped'] for r in results_list) / total_runs,
+            "avg_ticks": sum(r['ticks'] for r in results_list) / total_runs,
+            "avg_total_wait": sum(r['total_wait'] for r in results_list) / total_runs,
+            "avg_avg_wait": sum(r['avg_wait'] for r in results_list) / total_runs,
+            "trials": total_runs,
+            "errors": sum(1 for r in results_list if r['error'] is not None)
+        }
+        results.append(avg_stats)
+
+    return results
+
+
 
 def print_results(results):
     """
@@ -372,16 +419,21 @@ if __name__ == "__main__":
     import argparse
     
     parser = argparse.ArgumentParser(description="Test evacuation algorithms")
-    parser.add_argument("--trials", type=int, default=5, help="Number of trials per configuration (default: 5)")
+    parser.add_argument("--trials", type=int, default=10, help="Number of trials per configuration (default: 5)")
     parser.add_argument("--output", type=str, default="algorithm_test_results.json", help="Output file for results")
+    parser.add_argument("--use_maps", action="store_true",
+                        help="Use pre-made maps in the 'test_cases/' directory instead of generating new maps")
     
     args = parser.parse_args()
     
-    print(f"\nStarting algorithm performance tests with {args.trials} trials per configuration...")
-    print(f"This will run {len(TEST_CONFIGS) * len(ALGORITHMS) * args.trials} total simulations.\n")
-    
     start_time = time.time()
-    results = run_tests(num_trials=args.trials)
+
+    if args.use_maps:
+        print("\nRunning tests using pre-made maps from 'test_cases/'")
+        results = run_tests_on_directory(num_trials=args.trials)
+    else:
+        print("\nRunning tests using generated maps")
+        results = run_tests(num_trials=args.trials)
     end_time = time.time()
     
     winner = print_results(results)
